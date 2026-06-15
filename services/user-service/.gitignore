@@ -1,0 +1,12 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+## EF Core migrations auto-generated snapshots are committed, but artifacts are not
+*.db
+*.db-shm
+*.db-wal
