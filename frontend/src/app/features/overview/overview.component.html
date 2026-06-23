@@ -1,0 +1,50 @@
+<div class="sh-screen">
+  <nav class="topnav">
+    <div class="topnav-left">
+      <div class="topnav-logo">
+        <img class="topnav-logo-mark" src="logo.png?v=3" alt="" />
+        <span class="mono topnav-logo-text">shelvio</span>
+      </div>
+      <div class="mono topnav-items">
+        <span class="topnav-item active">overview</span>
+        <span class="topnav-item">search</span>
+        <span class="topnav-item">library</span>
+        <span class="topnav-item">stats</span>
+        <span class="topnav-item">recommendations</span>
+      </div>
+    </div>
+    <div class="topnav-right">
+      <div class="topnav-avatar" (click)="logout()" title="Sign out">
+        {{ authService.currentUser()?.username?.charAt(0)?.toUpperCase() }}
+      </div>
+    </div>
+  </nav>
+
+  <div class="overview-body">
+    <div class="mono overview-eyebrow">you're in</div>
+    <h1 class="overview-headline">Welcome, {{ authService.currentUser()?.username }}.</h1>
+    <p class="overview-subtext">
+      Auth radi end-to-end: registracija/login, JWT access token, refresh token i zasticen
+      profil endpoint. Ostatak aplikacije (pretraga, biblioteka, statistika, preporuke) dolazi
+      u narednim fazama.
+    </p>
+
+    <div class="overview-card">
+      <div class="mono overview-card-label">prijavljen kao</div>
+      <div class="overview-card-row">
+        <span class="overview-card-key">username</span>
+        <span class="overview-card-value">{{ authService.currentUser()?.username }}</span>
+      </div>
+      <div class="overview-card-row">
+        <span class="overview-card-key">email</span>
+        <span class="overview-card-value">{{ authService.currentUser()?.email }}</span>
+      </div>
+      <div class="overview-card-row">
+        <span class="overview-card-key">user id</span>
+        <span class="overview-card-value mono">{{ authService.currentUser()?.id }}</span>
+      </div>
+    </div>
+
+    <button class="overview-logout" (click)="logout()">Sign out</button>
+  </div>
+</div>

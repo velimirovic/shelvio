@@ -1,0 +1,117 @@
+<div class="sh-screen auth-screen">
+  <div class="auth-brand">
+    <div class="auth-logo">
+      <img class="auth-logo-mark" src="logo.png?v=3" alt="" />
+      <span class="mono auth-logo-text">shelvio</span>
+    </div>
+
+    <div class="auth-pitch">
+      <div class="mono auth-tagline">one shelf for everything</div>
+      <h1 class="auth-headline">
+        Track every film, series and book you love and let us find the next one.
+      </h1>
+      <p class="auth-subtext">
+        Shelvio learns from everything you watch and read, then points you to what's worth
+        your time next — with a reason you can actually trust.
+      </p>
+    </div>
+
+    <div class="auth-stats">
+      <div class="auth-stat">
+        <div class="auth-stat-value">142</div>
+        <div class="auth-stat-label">titles tracked</div>
+      </div>
+      <div class="auth-stat">
+        <div class="auth-stat-value">3</div>
+        <div class="auth-stat-label">media types</div>
+      </div>
+      <div class="auth-stat">
+        <div class="auth-stat-value">5</div>
+        <div class="auth-stat-label">fresh picks weekly</div>
+      </div>
+    </div>
+
+    <div class="auth-glow"></div>
+  </div>
+
+  <div class="auth-form-panel">
+    <div class="auth-form-wrap">
+      <div class="auth-segmented mono">
+        <div
+          class="auth-segment"
+          [class.active]="!isRegister()"
+          (click)="setLogin()"
+        >
+          sign in
+        </div>
+        <div
+          class="auth-segment"
+          [class.active]="isRegister()"
+          (click)="setRegister()"
+        >
+          create account
+        </div>
+      </div>
+
+      @if (isRegister()) {
+        <h2 class="auth-title">Create your account</h2>
+        <p class="auth-description">Start your shelf in under a minute.</p>
+      } @else {
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-description">Sign in to pick up where you left off.</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="auth-field">
+          <div class="mono auth-label">username</div>
+          <input
+            class="auth-input"
+            type="text"
+            formControlName="username"
+            placeholder="marko_v"
+            autocomplete="username"
+          />
+        </div>
+
+        @if (isRegister()) {
+          <div class="auth-field">
+            <div class="mono auth-label">email</div>
+            <input
+              class="auth-input"
+              type="email"
+              formControlName="email"
+              placeholder="marko@shelvio.app"
+              autocomplete="email"
+            />
+          </div>
+        }
+
+        <div class="auth-field">
+          <div class="mono auth-label">password</div>
+          <div class="auth-password-wrap">
+            <input
+              class="auth-input auth-input--password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••••"
+              autocomplete="current-password"
+            />
+            <span class="mono auth-show-toggle" (click)="togglePasswordVisibility()">
+              {{ showPassword() ? 'hide' : 'show' }}
+            </span>
+          </div>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="auth-error">{{ errorMessage() }}</div>
+        }
+
+        <button type="submit" class="auth-submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'please wait…' : (isRegister() ? 'Create account' : 'Sign in') }}
+        </button>
+      </form>
+
+      <div class="auth-fine-print">By continuing you agree to our terms and privacy policy.</div>
+    </div>
+  </div>
+</div>
