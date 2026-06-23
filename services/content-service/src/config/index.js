@@ -4,10 +4,8 @@ module.exports = {
     apiKey: process.env.TMDB_API_KEY,
     baseUrl: 'https://api.themoviedb.org/3',
   },
-  googleBooks: {
-    apiKey: process.env.GOOGLE_BOOKS_API_KEY,
-    baseUrl: 'https://www.googleapis.com/books/v1',
-  },
+  // Knjige idu preko Open Library (openlibrary.org) - besplatan javan API, ne
+  // trazi kljuc, pa nema sta da se konfigurise ovde (vidi clients/openLibraryClient.js).
   redis: {
     url: process.env.REDIS_URL || 'redis://redis:6379',
     ttlSeconds: 60 * 60 * 24, // 24h
