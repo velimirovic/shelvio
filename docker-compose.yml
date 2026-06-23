@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: userdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5532:5432"   # exposed for local DB client access (dev only) - 5432 taken by native Windows Postgres
     volumes:
       - postgres-user-data:/var/lib/postgresql/data
     networks:
@@ -24,6 +26,8 @@ services:
       POSTGRES_DB: trackingdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5533:5432"   # exposed for local DB client access (dev only) - 5432 taken by native Windows Postgres
     volumes:
       - postgres-tracking-data:/var/lib/postgresql/data
     networks:
@@ -40,6 +44,8 @@ services:
       POSTGRES_DB: recommendationdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5534:5432"   # exposed for local DB client access (dev only) - 5432 taken by native Windows Postgres
     volumes:
       - postgres-recommendation-data:/var/lib/postgresql/data
     networks:
@@ -52,6 +58,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    ports:
+      - "6379:6379"   # exposed for local Redis client access (dev only)
     volumes:
       - redis-data:/data
     networks:
