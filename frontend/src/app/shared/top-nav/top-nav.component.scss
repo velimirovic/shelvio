@@ -60,6 +60,12 @@
   }
 }
 
+.topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .topnav-avatar {
   width: 32px;
   height: 32px;
@@ -71,5 +77,32 @@
   justify-content: center;
   font-weight: 600;
   font-size: 13px;
+}
+
+.topnav-logout {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--ink2);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.16s, color 0.16s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: var(--surface2);
+    color: var(--ink);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
 }
