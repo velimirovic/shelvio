@@ -1,0 +1,25 @@
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="topnav-logo">
+      <img class="topnav-logo-mark" src="logo.png?v=3" alt="" />
+      <span class="mono topnav-logo-text">shelvio</span>
+    </div>
+    <div class="mono topnav-items">
+      <a
+        class="topnav-item"
+        routerLink="/overview"
+        routerLinkActive="active"
+        >overview</a
+      >
+      <a class="topnav-item" routerLink="/search" routerLinkActive="active">search</a>
+      <span class="topnav-item topnav-item--inert">library</span>
+      <span class="topnav-item topnav-item--inert">stats</span>
+      <span class="topnav-item topnav-item--inert">recommendations</span>
+    </div>
+  </div>
+  <div class="topnav-right">
+    <div class="topnav-avatar" (click)="logout()" title="Sign out">
+      {{ authService.currentUser()?.username?.charAt(0)?.toUpperCase() }}
+    </div>
+  </div>
+</nav>

@@ -14,5 +14,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/overview/overview.component').then((m) => m.OverviewComponent)
   },
+  {
+    path: 'search',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/search/search.component').then((m) => m.SearchComponent)
+  },
   { path: '**', redirectTo: 'overview' }
 ];
