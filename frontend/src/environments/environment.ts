@@ -1,4 +1,4 @@
 export const environment = {
-  // Dok ne postoji API Gateway, frontend gadja User Service direktno.
-  apiUrl: 'http://localhost:5122/api'
+  // Frontend ide isključivo kroz API Gateway - jedini javno izloženi ulaz u sistem.
+  apiUrl: 'http://localhost:8080/api'
 };
