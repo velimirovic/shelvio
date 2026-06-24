@@ -35,6 +35,16 @@ async function getSeriesDetails(id) {
   return data;
 }
 
+async function movieRecommendations(id) {
+  const { data } = await tmdbClient.get(`/movie/${id}/recommendations`);
+  return data.results;
+}
+
+async function seriesRecommendations(id) {
+  const { data } = await tmdbClient.get(`/tv/${id}/recommendations`);
+  return data.results;
+}
+
 async function trendingMovies() {
   const { data } = await tmdbClient.get('/trending/movie/week');
   return data.results;
@@ -50,6 +60,8 @@ module.exports = {
   searchSeries,
   getMovieDetails,
   getSeriesDetails,
+  movieRecommendations,
+  seriesRecommendations,
   trendingMovies,
   trendingSeries,
   posterUrl

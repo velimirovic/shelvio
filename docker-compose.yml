@@ -130,7 +130,7 @@ services:
     environment:
       PORT: 3000
       TMDB_API_KEY: ${TMDB_API_KEY}
-      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
+      HARDCOVER_API_TOKEN: ${HARDCOVER_API_TOKEN}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     depends_on:

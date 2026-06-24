@@ -1,9 +1,10 @@
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, ElementRef, HostListener, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Observable, catchError, debounceTime, distinctUntilChanged, map, of, share, switchMap } from 'rxjs';
 import { ContentService } from '../../core/services/content.service';
-import { ContentItem, ContentType, SearchResponse } from '../../core/models/content.models';
+import { ContentItem, ContentType, SearchResponse, TrendingResponse } from '../../core/models/content.models';
 import { TopNavComponent } from '../../shared/top-nav/top-nav.component';
 
 type Category = 'all' | ContentType;
@@ -24,7 +25,7 @@ const EMPTY_RESPONSE: SearchResponse = { query: '', count: 0, results: [] };
 
 @Component({
   selector: 'app-search',
-  imports: [ReactiveFormsModule, TopNavComponent, DecimalPipe, NgTemplateOutlet],
+  imports: [ReactiveFormsModule, TopNavComponent, DecimalPipe, NgTemplateOutlet, RouterLink],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
 })
@@ -46,8 +47,12 @@ export class SearchComponent implements OnInit {
   readonly isLoadingSeries = signal(false);
   readonly isLoadingBooks = signal(false);
 
-  readonly trendingResults = signal<ContentItem[]>([]);
-  readonly isLoadingTrending = signal(false);
+  readonly trendingMovies = signal<ContentItem[]>([]);
+  readonly trendingSeries = signal<ContentItem[]>([]);
+  readonly trendingBooks = signal<ContentItem[]>([]);
+  readonly isLoadingTrendingMovies = signal(false);
+  readonly isLoadingTrendingSeries = signal(false);
+  readonly isLoadingTrendingBooks = signal(false);
 
   // contentId-ovi cija slika nije uspela da se ucita (vidi (error) na <img>).
   private readonly brokenImageIds = signal<Set<string>>(new Set());
@@ -61,8 +66,14 @@ export class SearchComponent implements OnInit {
   readonly visibleBooks = computed(() =>
     this.bookResults().filter((r) => !this.brokenImageIds().has(r.contentId))
   );
-  readonly visibleTrending = computed(() =>
-    this.trendingResults().filter((r) => !this.brokenImageIds().has(r.contentId))
+  readonly visibleTrendingMovies = computed(() =>
+    this.trendingMovies().filter((r) => !this.brokenImageIds().has(r.contentId))
+  );
+  readonly visibleTrendingSeries = computed(() =>
+    this.trendingSeries().filter((r) => !this.brokenImageIds().has(r.contentId))
+  );
+  readonly visibleTrendingBooks = computed(() =>
+    this.trendingBooks().filter((r) => !this.brokenImageIds().has(r.contentId))
   );
 
   readonly counts = computed(() => ({
@@ -104,6 +115,9 @@ export class SearchComponent implements OnInit {
   readonly moviesScroll = viewChild<ElementRef<HTMLElement>>('moviesScrollEl');
   readonly seriesScroll = viewChild<ElementRef<HTMLElement>>('seriesScrollEl');
   readonly booksScroll = viewChild<ElementRef<HTMLElement>>('booksScrollEl');
+  readonly trendingMoviesScroll = viewChild<ElementRef<HTMLElement>>('trendingMoviesScrollEl');
+  readonly trendingSeriesScroll = viewChild<ElementRef<HTMLElement>>('trendingSeriesScrollEl');
+  readonly trendingBooksScroll = viewChild<ElementRef<HTMLElement>>('trendingBooksScrollEl');
 
   constructor() {
     // Jedan deljen debounced stream - sve tri pretrage se granaju odavde preko switchMap.
@@ -141,10 +155,20 @@ export class SearchComponent implements OnInit {
       this.isLoadingMovies();
       this.isLoadingSeries();
       this.isLoadingBooks();
+      this.visibleTrendingMovies();
+      this.visibleTrendingSeries();
+      this.visibleTrendingBooks();
+      this.isLoadingTrendingMovies();
+      this.isLoadingTrendingSeries();
+      this.isLoadingTrendingBooks();
       this.category();
+      this.hasSearched();
       this.moviesScroll();
       this.seriesScroll();
       this.booksScroll();
+      this.trendingMoviesScroll();
+      this.trendingSeriesScroll();
+      this.trendingBooksScroll();
 
       requestAnimationFrame(() => this.fitAllRows());
     });
@@ -157,7 +181,13 @@ export class SearchComponent implements OnInit {
 
   // Racuna sirinu kartice tako da tacno TARGET_VISIBLE_COUNT ispuni red bez ostatka.
   private fitAllRows(): void {
-    const referenceEl = this.moviesScroll()?.nativeElement ?? this.seriesScroll()?.nativeElement ?? this.booksScroll()?.nativeElement;
+    const referenceEl =
+      this.moviesScroll()?.nativeElement ??
+      this.seriesScroll()?.nativeElement ??
+      this.booksScroll()?.nativeElement ??
+      this.trendingMoviesScroll()?.nativeElement ??
+      this.trendingSeriesScroll()?.nativeElement ??
+      this.trendingBooksScroll()?.nativeElement;
 
     if (!referenceEl) {
       return;
@@ -177,14 +207,26 @@ export class SearchComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isLoadingTrending.set(true);
+    // Tri nezavisna poziva - isti princip kao searchMovies/Series/Books, svaki tip se
+    // prikazuje cim stigne, ne ceka ostale.
+    this.loadTrending(this.contentService.getTrendingMovies(), this.trendingMovies, this.isLoadingTrendingMovies);
+    this.loadTrending(this.contentService.getTrendingSeries(), this.trendingSeries, this.isLoadingTrendingSeries);
+    this.loadTrending(this.contentService.getTrendingBooks(), this.trendingBooks, this.isLoadingTrendingBooks);
+  }
 
-    this.contentService.getTrending().subscribe({
+  private loadTrending(
+    request: Observable<TrendingResponse>,
+    resultsSignal: ReturnType<typeof signal<ContentItem[]>>,
+    loadingSignal: ReturnType<typeof signal<boolean>>
+  ): void {
+    loadingSignal.set(true);
+
+    request.subscribe({
       next: (response) => {
-        this.trendingResults.set(response.results);
-        this.isLoadingTrending.set(false);
+        resultsSignal.set(response.results);
+        loadingSignal.set(false);
       },
-      error: () => this.isLoadingTrending.set(false)
+      error: () => loadingSignal.set(false)
     });
   }
 

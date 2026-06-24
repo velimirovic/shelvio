@@ -46,9 +46,40 @@ async function getDetails(req, res) {
   res.json(details);
 }
 
-async function getTrending(req, res) {
-  const results = await contentService.getTrending();
+async function getTrendingMovies(req, res) {
+  const results = await contentService.getTrendingMovies();
   res.json({ count: results.length, results });
 }
 
-module.exports = { searchMovies, searchSeries, searchBooks, getDetails, getTrending };
+async function getTrendingSeries(req, res) {
+  const results = await contentService.getTrendingSeries();
+  res.json({ count: results.length, results });
+}
+
+async function getTrendingBooks(req, res) {
+  const results = await contentService.getTrendingBooks();
+  res.json({ count: results.length, results });
+}
+
+async function getSimilar(req, res) {
+  const { type, id } = req.params;
+  const validTypes = ['movie', 'series', 'book'];
+
+  if (!validTypes.includes(type)) {
+    throw new AppError(`Invalid content type '${type}'. Must be one of: ${validTypes.join(', ')}.`, 400);
+  }
+
+  const results = await contentService.getSimilar(type, id, req.query.hint);
+  res.json({ count: results.length, results });
+}
+
+module.exports = {
+  searchMovies,
+  searchSeries,
+  searchBooks,
+  getDetails,
+  getTrendingMovies,
+  getTrendingSeries,
+  getTrendingBooks,
+  getSimilar
+};

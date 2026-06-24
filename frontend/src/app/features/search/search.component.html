@@ -38,15 +38,87 @@
       </div>
     }
 
-    @if (!hasSearched() && !isLoadingTrending()) {
-      <div class="mono search-trending-label">popular this week</div>
-    }
-
-    <!-- Prazna pretraga -> trending grid -->
     @if (!hasSearched()) {
-      <div class="search-grid">
-        @for (item of visibleTrending(); track item.contentId) {
-          <ng-container *ngTemplateOutlet="posterCard; context: { $implicit: item }" />
+      <div class="mono search-trending-label">popular this week</div>
+
+      <div class="search-row-section">
+        <div class="search-row-header">
+          <span class="mono search-row-title">movies</span>
+        </div>
+        @if (isLoadingTrendingMovies()) {
+          <div class="search-row-status">
+            <span class="mono">Loading…</span>
+          </div>
+        } @else if (visibleTrendingMovies().length === 0) {
+          <div class="search-row-status search-row-status--empty">
+            <span class="mono">No movies found</span>
+          </div>
+        } @else {
+          <div class="search-row-wrap">
+            <button class="search-row-arrow" (click)="scrollRow(trendingMoviesScroll(), -1)" aria-label="Scroll left">‹</button>
+            <div class="search-row-scroll" #trendingMoviesScrollEl>
+              @for (item of visibleTrendingMovies(); track item.contentId) {
+                <div class="search-row-item">
+                  <ng-container *ngTemplateOutlet="posterCard; context: { $implicit: item }" />
+                </div>
+              }
+            </div>
+            <button class="search-row-arrow" (click)="scrollRow(trendingMoviesScroll(), 1)" aria-label="Scroll right">›</button>
+          </div>
+        }
+      </div>
+
+      <div class="search-row-section">
+        <div class="search-row-header">
+          <span class="mono search-row-title">series</span>
+        </div>
+        @if (isLoadingTrendingSeries()) {
+          <div class="search-row-status">
+            <span class="mono">Loading…</span>
+          </div>
+        } @else if (visibleTrendingSeries().length === 0) {
+          <div class="search-row-status search-row-status--empty">
+            <span class="mono">No series found</span>
+          </div>
+        } @else {
+          <div class="search-row-wrap">
+            <button class="search-row-arrow" (click)="scrollRow(trendingSeriesScroll(), -1)" aria-label="Scroll left">‹</button>
+            <div class="search-row-scroll" #trendingSeriesScrollEl>
+              @for (item of visibleTrendingSeries(); track item.contentId) {
+                <div class="search-row-item">
+                  <ng-container *ngTemplateOutlet="posterCard; context: { $implicit: item }" />
+                </div>
+              }
+            </div>
+            <button class="search-row-arrow" (click)="scrollRow(trendingSeriesScroll(), 1)" aria-label="Scroll right">›</button>
+          </div>
+        }
+      </div>
+
+      <div class="search-row-section">
+        <div class="search-row-header">
+          <span class="mono search-row-title">books</span>
+        </div>
+        @if (isLoadingTrendingBooks()) {
+          <div class="search-row-status">
+            <span class="mono">Loading…</span>
+          </div>
+        } @else if (visibleTrendingBooks().length === 0) {
+          <div class="search-row-status search-row-status--empty">
+            <span class="mono">No books found</span>
+          </div>
+        } @else {
+          <div class="search-row-wrap">
+            <button class="search-row-arrow" (click)="scrollRow(trendingBooksScroll(), -1)" aria-label="Scroll left">‹</button>
+            <div class="search-row-scroll" #trendingBooksScrollEl>
+              @for (item of visibleTrendingBooks(); track item.contentId) {
+                <div class="search-row-item">
+                  <ng-container *ngTemplateOutlet="posterCard; context: { $implicit: item }" />
+                </div>
+              }
+            </div>
+            <button class="search-row-arrow" (click)="scrollRow(trendingBooksScroll(), 1)" aria-label="Scroll right">›</button>
+          </div>
         }
       </div>
     }
@@ -114,7 +186,6 @@
         @if (isLoadingBooks()) {
           <div class="search-row-status">
             <span class="mono">Searching for books…</span>
-            <span class="search-row-status-hint">Open Library can take a few seconds</span>
           </div>
         } @else if (visibleBooks().length === 0) {
           <div class="search-row-status search-row-status--empty">
@@ -151,7 +222,7 @@
 </div>
 
 <ng-template #posterCard let-item>
-  <div class="search-poster">
+  <a class="search-poster" [routerLink]="['/title', item.contentType, item.contentId]">
     <div class="search-poster-art">
       <img
         class="search-poster-img"
@@ -191,5 +262,5 @@
     </div>
     <div class="search-poster-title">{{ item.title }}</div>
     <div class="mono search-poster-meta">{{ itemTypeLabel(item.contentType) }} · {{ item.year ?? '—' }}</div>
-  </div>
+  </a>
 </ng-template>

@@ -1,5 +1,5 @@
 const tmdbClient = require('../clients/tmdbClient');
-const openLibraryClient = require('../clients/openLibraryClient');
+const hardcoverClient = require('../clients/hardcoverClient');
 const cacheService = require('./cacheService');
 
 // Fiksira TMDB-ov "sirov" float (npr. 7.7790000004) na tacno 2 decimale.
@@ -7,7 +7,7 @@ function roundRating(value) {
   return Math.round(value * 100) / 100;
 }
 
-// Prevodi TMDB/Open Library odgovore u jedinstven oblik (contentId, contentType, title, year, posterUrl, rating, overview).
+// Prevodi TMDB/Hardcover odgovore u jedinstven oblik (contentId, contentType, title, year, posterUrl, rating, overview).
 function normalizeMovie(result) {
   return {
     contentId: String(result.id),
@@ -32,26 +32,35 @@ function normalizeSeries(result) {
   };
 }
 
+// Hardcover search hit document (i search i searchByAuthor vracaju isti oblik).
 function normalizeBook(doc) {
   return {
-    contentId: doc.key.replace('/works/', ''),
+    contentId: String(doc.id),
     contentType: 'book',
     title: doc.title,
-    year: doc.first_publish_year ? String(doc.first_publish_year) : null,
-    posterUrl: openLibraryClient.coverUrl(doc.cover_i),
-    // Open Library ocenjuje 0-5, skaliramo na 0-10 (kao TMDB) - zato *2.
-    rating: doc.ratings_average ? roundRating(doc.ratings_average * 2) : null,
-    // Opis se povlaci tek u getDetails(), search rezultati ga ne sadrze.
-    overview: ''
+    year: doc.release_year ? String(doc.release_year) : null,
+    posterUrl: doc.image?.url ?? null,
+    // Hardcover ocenjuje 0-5, skaliramo na 0-10 (kao TMDB) - zato *2.
+    rating: doc.rating ? roundRating(doc.rating * 2) : null,
+    overview: doc.description ?? ''
   };
 }
 
 // Rangiranje: relevanceScore = textMatchScore*0.7 + popularityScore*0.3 - tekst dominira, popularnost samo razdvaja slicno dobre poklapanja.
+
+// Skida "the/a/an " s pocetka - bez ovoga "The Kite Runner" i "Kite Runner" (cest
+// slucaj duplikata istog naslova sa/bez clana) ne broje se kao isto ime, pa losiji
+// (manje poznat) duplikat moze da pretekne pravu/poznatu knjigu/film samo zato sto mu
+// se naziv slovo-po-slovo bukvalnije poklapa sa upitom.
+function stripLeadingArticle(text) {
+  return text.replace(/^(the|a|an)\s+/, '');
+}
+
 function textMatchScore(title, query) {
   if (!title) return 0;
 
-  const normalizedTitle = title.toLowerCase().trim();
-  const normalizedQuery = query.toLowerCase().trim();
+  const normalizedTitle = stripLeadingArticle(title.toLowerCase().trim());
+  const normalizedQuery = stripLeadingArticle(query.toLowerCase().trim());
 
   if (normalizedTitle === normalizedQuery) return 1;
   if (normalizedTitle.startsWith(normalizedQuery)) return 0.8;
@@ -60,9 +69,10 @@ function textMatchScore(title, query) {
   return 0.2;
 }
 
-// TMDB "popularity" ili Open Library "ratings_count", log10-skalirano u opseg 0-1.
+// TMDB "popularity" ili Hardcover "users_count" (koliko korisnika ima knjigu u
+// biblioteci - jaci signal poznatosti od ratings_count), log10-skalirano u opseg 0-1.
 function popularityScore(raw, kind) {
-  const rawPopularity = kind === 'movie' || kind === 'series' ? raw.popularity || 0 : raw.ratings_count || 0;
+  const rawPopularity = kind === 'movie' || kind === 'series' ? raw.popularity || 0 : raw.users_count || 0;
 
   return Math.min(Math.log10(rawPopularity + 1) / 4, 1);
 }
@@ -77,7 +87,7 @@ function relevanceScore(raw, kind, query) {
   return textMatchScore(titleOf(raw, kind), query) * 0.7 + popularityScore(raw, kind) * 0.3;
 }
 
-// Pretraga po tipu (ne kombinovano) - Open Library je sporiji od TMDB-a, ne treba da blokira prikaz filmova/serija.
+// Pretraga po tipu (ne kombinovano) - svaki tip se nezavisno prikazuje na frontu, ne treba da se cekaju jedan drugog.
 async function searchByKind(kind, query, fetchRaw, normalize) {
   const cacheKey = `content:search:${kind}:${query.toLowerCase().trim()}`;
   const cached = await cacheService.getCached(cacheKey);
@@ -108,12 +118,7 @@ function searchSeries(query) {
 }
 
 function searchBooks(query) {
-  // Open Library odbija upite krace od 3 karaktera (422) - vrati praznu listu umesto greske.
-  if (query.trim().length < 3) {
-    return Promise.resolve([]);
-  }
-
-  return searchByKind('book', query, openLibraryClient.searchBooks, normalizeBook);
+  return searchByKind('book', query, hardcoverClient.searchBooks, normalizeBook);
 }
 
 async function getDetails(contentType, contentId) {
@@ -136,6 +141,8 @@ async function getDetails(contentType, contentId) {
       posterUrl: tmdbClient.posterUrl(data.poster_path),
       rating: data.vote_average ? roundRating(data.vote_average) : null,
       genres: data.genres?.map((g) => g.name) ?? [],
+      // Koristi se za "ukupno vreme gledanja" statistiku u Tracking Service-u.
+      durationMinutes: data.runtime || null,
       overview: data.overview ?? ''
     };
   } else if (contentType === 'series') {
@@ -148,26 +155,36 @@ async function getDetails(contentType, contentId) {
       posterUrl: tmdbClient.posterUrl(data.poster_path),
       rating: data.vote_average ? roundRating(data.vote_average) : null,
       genres: data.genres?.map((g) => g.name) ?? [],
+      // TMDB nema jedinstveno "trajanje" za seriju - aproksimacija: trajanje epizode * broj epizoda.
+      durationMinutes:
+        data.episode_run_time?.[0] && data.number_of_episodes
+          ? data.episode_run_time[0] * data.number_of_episodes
+          : null,
       overview: data.overview ?? ''
     };
   } else if (contentType === 'book') {
-    // Detalji i ocena su dva razlicita Open Library endpoint-a, pozivaju se paralelno.
-    const [work, rating] = await Promise.all([
-      openLibraryClient.getWorkDetails(contentId),
-      openLibraryClient.getWorkRating(contentId)
-    ]);
+    const book = await hardcoverClient.getBookById(contentId);
 
-    const description = typeof work.description === 'string' ? work.description : work.description?.value ?? '';
+    if (!book) {
+      return null;
+    }
+
+    // default_physical_edition.release_date je TACNIJI od books.release_year (koji je
+    // ponekad pogresan - npr. najstarija/placeholder edicija u njihovoj bazi).
+    const releaseDate = book.default_physical_edition?.release_date;
 
     details = {
-      contentId,
+      contentId: String(book.id),
       contentType: 'book',
-      title: work.title,
-      year: null, // works endpoint nema godinu prvog izdanja
-      posterUrl: work.covers?.[0] ? openLibraryClient.coverUrl(work.covers[0]) : null,
-      rating: rating ? roundRating(rating * 2) : null,
-      genres: (work.subjects || []).slice(0, 5),
-      overview: description
+      title: book.title,
+      year: releaseDate ? releaseDate.slice(0, 4) : null,
+      posterUrl: book.cached_image?.url ?? null,
+      rating: book.rating ? roundRating(book.rating * 2) : null,
+      genres: (book.cached_tags?.Genre ?? []).map((g) => g.tag).slice(0, 5),
+      durationMinutes: null, // koncept "trajanja" se ne primenjuje na knjige
+      // Koristi se kao "hint" za /similar (pretraga ostalih knjiga istog autora).
+      author: book.contributions?.[0]?.author?.name ?? null,
+      overview: book.description ?? ''
     };
   } else {
     return null;
@@ -178,24 +195,94 @@ async function getDetails(contentType, contentId) {
   return details;
 }
 
-// Prikazuje se dok je polje za pretragu prazno - samo filmovi+serije (Open Library nema trending endpoint).
-async function getTrending() {
-  const cacheKey = 'content:trending';
+// books_trending(duration: week) vraca "books" oblik (id/title/rating/cached_image/
+// default_physical_edition), RAZLICIT od search hit dokumenta - zato posebna normalize.
+function normalizeTrendingBook(book) {
+  const releaseDate = book.default_physical_edition?.release_date;
+
+  return {
+    contentId: String(book.id),
+    contentType: 'book',
+    title: book.title,
+    year: releaseDate ? releaseDate.slice(0, 4) : null,
+    posterUrl: book.cached_image?.url ?? null,
+    rating: book.rating ? roundRating(book.rating * 2) : null,
+    overview: book.description ?? ''
+  };
+}
+
+// "Popular this week" - tri nezavisna poziva (isti princip kao searchMovies/Series/
+// Books - svaki tip se prikazuje cim stigne, ne ceka ostale).
+async function getTrendingByKind(kind, fetchRaw, normalize) {
+  const cacheKey = `content:trending:${kind}`;
   const cached = await cacheService.getCached(cacheKey);
 
   if (cached) {
     return cached;
   }
 
-  const [movies, series] = await Promise.all([tmdbClient.trendingMovies(), tmdbClient.trendingSeries()]);
-
-  const results = [...movies.map(normalizeMovie), ...series.map(normalizeSeries)].filter((item) =>
-    Boolean(item.posterUrl)
-  );
+  const raw = await fetchRaw();
+  const results = raw.map(normalize).filter((item) => Boolean(item.posterUrl));
 
   await cacheService.setCached(cacheKey, results, 60 * 60); // kraci TTL (1h) - trending se cesce menja
 
   return results;
 }
 
-module.exports = { searchMovies, searchSeries, searchBooks, getDetails, getTrending };
+function getTrendingMovies() {
+  return getTrendingByKind('movie', tmdbClient.trendingMovies, normalizeMovie);
+}
+
+function getTrendingSeries() {
+  return getTrendingByKind('series', tmdbClient.trendingSeries, normalizeSeries);
+}
+
+function getTrendingBooks() {
+  return getTrendingByKind('book', hardcoverClient.getTrendingBooks, normalizeTrendingBook);
+}
+
+// "Slicni naslovi" za Detail ekran. Filmovi/serije koriste TMDB-ov sopstveni
+// /recommendations endpoint (stvarno povezan sa konkretnim naslovom). Hardcover nema
+// ekvivalentan endpoint, pa se za knjige koristi pretraga po AUTORU (ostale knjige
+// istog autora) kao najbliza zamena - hint (autor) dolazi od frontenda (vec ga ima sa
+// Detail stranice), bez njega vraca se prazna lista.
+async function getSimilar(contentType, contentId, hint) {
+  const cacheKey = `content:similar:${contentType}:${contentId}:${hint || ''}`;
+  const cached = await cacheService.getCached(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  let results;
+
+  if (contentType === 'movie') {
+    const raw = await tmdbClient.movieRecommendations(contentId);
+    results = raw.map(normalizeMovie).filter((item) => Boolean(item.posterUrl));
+  } else if (contentType === 'series') {
+    const raw = await tmdbClient.seriesRecommendations(contentId);
+    results = raw.map(normalizeSeries).filter((item) => Boolean(item.posterUrl));
+  } else if (contentType === 'book' && hint) {
+    const raw = await hardcoverClient.searchByAuthor(hint);
+    results = raw.map(normalizeBook).filter((item) => Boolean(item.posterUrl) && item.contentId !== contentId);
+  } else {
+    results = [];
+  }
+
+  results = results.slice(0, 5);
+
+  await cacheService.setCached(cacheKey, results);
+
+  return results;
+}
+
+module.exports = {
+  searchMovies,
+  searchSeries,
+  searchBooks,
+  getDetails,
+  getTrendingMovies,
+  getTrendingSeries,
+  getTrendingBooks,
+  getSimilar
+};

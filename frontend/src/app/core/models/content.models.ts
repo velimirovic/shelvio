@@ -12,6 +12,9 @@ export interface ContentItem {
 
 export interface ContentDetails extends ContentItem {
   genres: string[];
+  durationMinutes: number | null;
+  // Samo za knjige - koristi se kao "hint" za /similar (ostale knjige istog autora).
+  author?: string | null;
 }
 
 export interface SearchResponse {
@@ -21,6 +24,11 @@ export interface SearchResponse {
 }
 
 export interface TrendingResponse {
+  count: number;
+  results: ContentItem[];
+}
+
+export interface SimilarResponse {
   count: number;
   results: ContentItem[];
 }

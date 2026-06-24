@@ -138,11 +138,6 @@
   }
 }
 
-.search-row-status-hint {
-  font-size: 11px;
-  color: var(--ink3);
-}
-
 .search-row-wrap {
   display: flex;
   align-items: center;
@@ -195,7 +190,10 @@
 }
 
 .search-poster {
-  cursor: default;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
   // min-width:0 sprecava da dugi naslovi knjiga rasire svoju grid kolonu.
   min-width: 0;
 }
