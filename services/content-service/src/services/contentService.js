@@ -143,6 +143,7 @@ async function getDetails(contentType, contentId) {
       genres: data.genres?.map((g) => g.name) ?? [],
       // Koristi se za "ukupno vreme gledanja" statistiku u Tracking Service-u.
       durationMinutes: data.runtime || null,
+      pages: null, // koncept "broja stranica" se ne primenjuje na filmove
       overview: data.overview ?? ''
     };
   } else if (contentType === 'series') {
@@ -160,6 +161,7 @@ async function getDetails(contentType, contentId) {
         data.episode_run_time?.[0] && data.number_of_episodes
           ? data.episode_run_time[0] * data.number_of_episodes
           : null,
+      pages: null, // koncept "broja stranica" se ne primenjuje na serije
       overview: data.overview ?? ''
     };
   } else if (contentType === 'book') {
@@ -182,6 +184,8 @@ async function getDetails(contentType, contentId) {
       rating: book.rating ? roundRating(book.rating * 2) : null,
       genres: (book.cached_tags?.Genre ?? []).map((g) => g.tag).slice(0, 5),
       durationMinutes: null, // koncept "trajanja" se ne primenjuje na knjige
+      // "Pages read" statistika u Tracking Service-u (isti princip kao durationMinutes).
+      pages: book.pages ?? null,
       // Koristi se kao "hint" za /similar (pretraga ostalih knjiga istog autora).
       author: book.contributions?.[0]?.author?.name ?? null,
       overview: book.description ?? ''

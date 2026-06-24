@@ -110,6 +110,7 @@ services:
       dockerfile: Dockerfile
     environment:
       ConnectionStrings__TrackingDb: "Host=postgres-tracking;Port=5432;Database=trackingdb;Username=postgres;Password=${POSTGRES_PASSWORD}"
+      Jwt__Secret: ${JWT_SECRET}
       Jwt__Issuer: shelvio
       Jwt__Audience: shelvio-clients
       RabbitMQ__Host: rabbitmq
