@@ -1,0 +1,171 @@
+<div class="sh-screen">
+  <app-top-nav />
+
+  <div class="stats-body">
+    <div class="mono stats-eyebrow">your stats</div>
+
+    @if (isLoading()) {
+      <p class="stats-status-text">Loading…</p>
+    } @else if (!stats() || stats()!.totalTitles === 0) {
+      <h1 class="stats-title">Nothing tracked yet.</h1>
+      <p class="stats-status-text">Add titles to your library to see stats here.</p>
+    } @else {
+      <h1 class="stats-title">{{ stats()!.totalTitles }} title{{ stats()!.totalTitles === 1 ? '' : 's' }} tracked so far.</h1>
+
+      <div class="stats-cards">
+        <div class="stats-card">
+          <div class="mono stats-card-label">hours watched</div>
+          <div class="stats-card-value">{{ stats()!.hoursWatched | number: '1.0-1' }}<span class="stats-card-unit">h</span></div>
+        </div>
+        <div class="stats-card">
+          <div class="mono stats-card-label">pages read</div>
+          <div class="stats-card-value">{{ stats()!.pagesRead | number }}</div>
+        </div>
+        <div class="stats-card">
+          <div class="mono stats-card-label">books read</div>
+          <div class="stats-card-value">{{ stats()!.booksRead }}</div>
+        </div>
+        <div class="stats-card">
+          <div class="mono stats-card-label">average rating</div>
+          <div class="stats-card-value">
+            @if (stats()!.averageRating !== null) {
+              ★ {{ stats()!.averageRating }}
+            } @else {
+              <span class="stats-card-empty">—</span>
+            }
+          </div>
+        </div>
+        <div class="stats-card">
+          <div class="mono stats-card-label">favorite decade</div>
+          <div class="stats-card-value">
+            @if (stats()!.favoriteDecade) {
+              {{ stats()!.favoriteDecade }}
+            } @else {
+              <span class="stats-card-empty">—</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-panels">
+        <div class="stats-panel">
+          <div class="stats-panel-title">Films, series &amp; books</div>
+          <div class="stats-donut-row">
+            <svg class="stats-donut" viewBox="0 0 120 120">
+              <circle class="stats-donut-track" cx="60" cy="60" r="50" fill="none" stroke-width="14" />
+              <g transform="rotate(-90 60 60)">
+                @for (seg of typeDonut(); track seg.label) {
+                  <circle
+                    cx="60" cy="60" r="50" fill="none" stroke-width="14"
+                    [attr.stroke]="seg.color"
+                    [attr.stroke-dasharray]="seg.dashArray"
+                    [attr.stroke-dashoffset]="seg.dashOffset"
+                  />
+                }
+              </g>
+              <text x="60" y="64" text-anchor="middle" class="stats-donut-center">{{ stats()!.totalTitles }}</text>
+            </svg>
+            <div class="stats-donut-legend">
+              <div class="stats-legend-row"><span class="stats-legend-dot" style="background: var(--accent)"></span>Movies · {{ stats()!.movieCount }}</div>
+              <div class="stats-legend-row"><span class="stats-legend-dot" style="background: #8b95ea"></span>Series · {{ stats()!.seriesCount }}</div>
+              <div class="stats-legend-row"><span class="stats-legend-dot" style="background: #c2c8f4"></span>Books · {{ stats()!.bookCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-panel">
+          <div class="stats-panel-title">Where things stand</div>
+          <div class="stats-donut-row">
+            <svg class="stats-donut" viewBox="0 0 120 120">
+              <circle class="stats-donut-track" cx="60" cy="60" r="50" fill="none" stroke-width="14" />
+              <g transform="rotate(-90 60 60)">
+                @for (seg of statusDonut(); track seg.label) {
+                  <circle
+                    cx="60" cy="60" r="50" fill="none" stroke-width="14"
+                    [attr.stroke]="seg.color"
+                    [attr.stroke-dasharray]="seg.dashArray"
+                    [attr.stroke-dashoffset]="seg.dashOffset"
+                  />
+                }
+              </g>
+              <text x="60" y="64" text-anchor="middle" class="stats-donut-center">{{ stats()!.totalTitles }}</text>
+            </svg>
+            <div class="stats-donut-legend">
+              <div class="stats-legend-row"><span class="stats-legend-dot" style="background: #4e8c5c"></span>Done · {{ stats()!.doneCount }}</div>
+              <div class="stats-legend-row"><span class="stats-legend-dot" style="background: var(--accent)"></span>In progress · {{ stats()!.inProgressCount }}</div>
+              <div class="stats-legend-row"><span class="stats-legend-dot" style="background: #a9772a"></span>Plan · {{ stats()!.planCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-panel stats-genres-panel">
+        <div class="stats-panel-title">What you reach for most</div>
+        <div class="stats-genre-columns">
+          <div class="stats-genre-column">
+            <div class="mono stats-genre-column-label">movies</div>
+            @if (stats()!.topMovieGenres.length === 0) {
+              <p class="stats-status-text">Nothing yet.</p>
+            } @else {
+              @for (genre of stats()!.topMovieGenres; track genre.genre) {
+                <div class="stats-genre-row">
+                  <span class="stats-genre-name">{{ genre.genre }}</span>
+                  <div class="stats-genre-track">
+                    <div class="stats-genre-fill" [style.width.%]="genreBarWidth(stats()!.topMovieGenres, genre.count)"></div>
+                  </div>
+                  <span class="mono stats-genre-count">{{ genre.count }}</span>
+                </div>
+              }
+            }
+          </div>
+
+          <div class="stats-genre-column">
+            <div class="mono stats-genre-column-label">series</div>
+            @if (stats()!.topSeriesGenres.length === 0) {
+              <p class="stats-status-text">Nothing yet.</p>
+            } @else {
+              @for (genre of stats()!.topSeriesGenres; track genre.genre) {
+                <div class="stats-genre-row">
+                  <span class="stats-genre-name">{{ genre.genre }}</span>
+                  <div class="stats-genre-track">
+                    <div class="stats-genre-fill" [style.width.%]="genreBarWidth(stats()!.topSeriesGenres, genre.count)"></div>
+                  </div>
+                  <span class="mono stats-genre-count">{{ genre.count }}</span>
+                </div>
+              }
+            }
+          </div>
+
+          <div class="stats-genre-column">
+            <div class="mono stats-genre-column-label">books</div>
+            @if (stats()!.topBookGenres.length === 0) {
+              <p class="stats-status-text">Nothing yet.</p>
+            } @else {
+              @for (genre of stats()!.topBookGenres; track genre.genre) {
+                <div class="stats-genre-row">
+                  <span class="stats-genre-name">{{ genre.genre }}</span>
+                  <div class="stats-genre-track">
+                    <div class="stats-genre-fill" [style.width.%]="genreBarWidth(stats()!.topBookGenres, genre.count)"></div>
+                  </div>
+                  <span class="mono stats-genre-count">{{ genre.count }}</span>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (stats()!.hoursWatched > 0) {
+        <div class="stats-fun-panel">
+          <div class="mono stats-fun-eyebrow">just for fun · not actually measured</div>
+          <div class="stats-fun-cards">
+            <div class="stats-fun-card">
+              <div class="stats-fun-value">{{ kmWalked() | number: '1.0-0' }}<span class="stats-card-unit">km</span></div>
+              <div class="stats-fun-label">you could've walked in the time you spent watching</div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

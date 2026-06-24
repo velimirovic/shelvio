@@ -20,5 +20,22 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/search/search.component').then((m) => m.SearchComponent)
   },
+  {
+    path: 'title/:type/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/detail/detail.component').then((m) => m.DetailComponent)
+  },
+  {
+    path: 'library',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/library/library.component').then((m) => m.LibraryComponent)
+  },
+  {
+    path: 'stats',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/stats.component').then((m) => m.StatsComponent)
+  },
   { path: '**', redirectTo: 'overview' }
 ];

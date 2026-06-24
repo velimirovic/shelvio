@@ -13,6 +13,8 @@ export interface ContentItem {
 export interface ContentDetails extends ContentItem {
   genres: string[];
   durationMinutes: number | null;
+  // Samo za knjige - "pages read" statistika u Tracking Service-u.
+  pages?: number | null;
   // Samo za knjige - koristi se kao "hint" za /similar (ostale knjige istog autora).
   author?: string | null;
 }

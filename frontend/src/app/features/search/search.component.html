@@ -2,15 +2,18 @@
   <app-top-nav />
 
   <div class="search-body">
-    <h1 class="search-title">Search</h1>
+    <h1 class="search-title">search</h1>
 
     <div class="search-bar">
-      <span class="search-bar-icon"></span>
+      <svg class="search-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
       <input
         class="search-bar-input"
         type="text"
         [formControl]="queryControl"
-        placeholder="Search titles…"
+        placeholder="search titles…"
         autocomplete="off"
       />
       @if (hasSearched() && !isAnyLoading()) {
@@ -39,7 +42,7 @@
     }
 
     @if (!hasSearched()) {
-      <div class="mono search-trending-label">popular this week</div>
+      <div class="search-trending-label">popular this week</div>
 
       <div class="search-row-section">
         <div class="search-row-header">

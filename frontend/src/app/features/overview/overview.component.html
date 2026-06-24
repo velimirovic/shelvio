@@ -4,11 +4,6 @@
   <div class="overview-body">
     <div class="mono overview-eyebrow">you're in</div>
     <h1 class="overview-headline">Welcome, {{ authService.currentUser()?.username }}.</h1>
-    <p class="overview-subtext">
-      Auth radi end-to-end: registracija/login, JWT access token, refresh token i zasticen
-      profil endpoint. Pretraga je dostupna u top nav-u. Ostatak aplikacije (biblioteka,
-      statistika, preporuke) dolazi u narednim fazama.
-    </p>
 
     <div class="overview-card">
       <div class="mono overview-card-label">prijavljen kao</div>
@@ -25,5 +20,7 @@
         <span class="overview-card-value mono">{{ authService.currentUser()?.id }}</span>
       </div>
     </div>
+
+    <div class="mono overview-tbd">To Be Done</div>
   </div>
 </div>

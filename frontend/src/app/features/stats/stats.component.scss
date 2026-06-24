@@ -1,0 +1,255 @@
+.stats-body {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 38px 30px 80px;
+}
+
+.stats-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+
+.stats-title {
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1.02;
+  margin: 0 0 26px;
+  letter-spacing: -0.03em;
+}
+
+.stats-status-text {
+  color: var(--ink2);
+  font-size: 14px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1000px) {
+  .stats-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stats-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.stats-card-label {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-bottom: 12px;
+}
+
+.stats-card-value {
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stats-card-unit {
+  font-size: 16px;
+  color: var(--ink3);
+  font-weight: 500;
+}
+
+.stats-card-empty {
+  color: var(--ink3);
+}
+
+.stats-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 760px) {
+  .stats-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-panel {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.stats-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+// ─── Donut charts ──────────────────────────────────────────────────────────
+
+.stats-donut-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.stats-donut {
+  flex: none;
+  width: 120px;
+  height: 120px;
+}
+
+.stats-donut-track {
+  stroke: var(--surface2);
+}
+
+.stats-donut-center {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+
+.stats-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+.stats-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-legend-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+// ─── Genres (3 kolone, jedna po tipu sadrzaja) ─────────────────────────────
+
+.stats-genres-panel {
+  margin-bottom: 16px;
+}
+
+.stats-genre-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 760px) {
+  .stats-genre-columns {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+.stats-genre-column-label {
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--ink3);
+  margin-bottom: 14px;
+}
+
+.stats-genre-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stats-genre-name {
+  width: 80px;
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-genre-track {
+  flex: 1;
+  height: 10px;
+  border-radius: 99px;
+  background: var(--surface2);
+  overflow: hidden;
+}
+
+.stats-genre-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+}
+
+.stats-genre-count {
+  flex: none;
+  width: 20px;
+  text-align: right;
+  font-size: 11.5px;
+  color: var(--ink2);
+}
+
+// ─── Fun facts ─────────────────────────────────────────────────────────────
+
+.stats-fun-panel {
+  border-radius: 18px;
+  background: linear-gradient(120deg, var(--accent-soft), var(--surface) 75%);
+  border: 1px solid var(--border);
+  padding: 24px 28px;
+  box-shadow: var(--shadow);
+}
+
+.stats-fun-eyebrow {
+  font-size: 11px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.stats-fun-cards {
+  display: flex;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+
+.stats-fun-card {
+  flex: 1;
+  min-width: 200px;
+}
+
+.stats-fun-value {
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.stats-fun-label {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.4;
+  max-width: 260px;
+}

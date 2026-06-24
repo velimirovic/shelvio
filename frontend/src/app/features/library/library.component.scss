@@ -1,0 +1,513 @@
+.library-body {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 38px 30px 80px;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.library-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+
+.library-title {
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.library-filters {
+  display: flex;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.library-filter {
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--ink2);
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+
+  &.active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+  }
+}
+
+.library-status-text {
+  color: var(--ink2);
+  font-size: 14px;
+
+  a {
+    color: var(--accent);
+  }
+}
+
+// Isti raster/kartica-izgled kao search posteri (search.component.scss) - korisnik
+// je trazio da Library kartice liice na search, samo sa dodatkom statusa.
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px 18px;
+}
+
+@media (max-width: 1000px) {
+  .library-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .library-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .library-favorites {
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+.library-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.library-card-art {
+  aspect-ratio: 2 / 3;
+  border-radius: 10px;
+  background-color: var(--surface2);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 9px;
+}
+
+.library-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.library-card-type-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.library-card-rating {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+
+.library-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--ink3);
+  margin-top: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.library-card-meta-sep {
+  flex: none;
+}
+
+// Status kao ikonica + tekst (van slike, u meta redu) umesto pill-a preko korice -
+// nema vise problema sa kontrastom na svetlim/sarenim koricama, i boja je
+// suptilnija/doslednija (samo ikonica+tekst u boji, ne ceo badge).
+.library-card-status {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 600;
+
+  svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  &--plan {
+    color: #a9772a;
+  }
+
+  &--in_progress {
+    color: var(--accent);
+  }
+
+  &--done {
+    color: #4e8c5c;
+  }
+}
+
+// ─── Top 3 favorites ───────────────────────────────────────────────────────
+// Sopstveni siri kontejner (ne 1180px kao ostatak biblioteke) - "skoro do ivica
+// ekrana", kartice u slotovima ostaju normalne sirine, samo se vise razmaknu.
+
+.library-favorites-wrap {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 38px 30px 0;
+}
+
+.library-favorites {
+  display: flex;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.library-favorites-row {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  // Vertikalna linija IZMEDJU kolona (ne pre prve) - razdvaja top movies/series/books
+  // koje su inace bile previse "spojene" jedna uz drugu. Margin+padding (umesto
+  // flex gap-a) drzi liniju TACNO na sredini razmaka.
+  &:not(:first-child) {
+    // var(--border) je bio previse blag (skoro neprimetan) - var(--border2) je
+    // izrazito tamniji ton iz iste palete, i 2px sirina (umesto 1px) je dovoljna
+    // da se linija stvarno vidi bez da izgleda kao gresan crtez.
+    border-left: 2px solid var(--border2);
+    margin-left: 28px;
+    padding-left: 28px;
+  }
+}
+
+.library-favorites-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--ink3);
+}
+
+.library-favorites-label-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.library-favorites-slots {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.library-favorite-card {
+  position: relative;
+  flex: 1;
+  max-width: 130px;
+}
+
+.library-favorite-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.library-favorite-art {
+  aspect-ratio: 2 / 3;
+  border-radius: 9px;
+  background-color: var(--surface2);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  margin-bottom: 6px;
+  box-shadow: var(--shadow);
+}
+
+.library-favorite-rank {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.library-favorite-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-favorite-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.14s;
+}
+
+.library-favorite-card:hover .library-favorite-remove {
+  opacity: 1;
+}
+
+.library-favorite-empty {
+  flex: 1;
+  max-width: 130px;
+  aspect-ratio: 2 / 3;
+  border-radius: 9px;
+  border: 1.5px dashed var(--border2);
+  background: transparent;
+  color: var(--ink3);
+  font-size: 24px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.14s, color 0.14s;
+
+  &:hover {
+    border-color: var(--ink3);
+    color: var(--ink2);
+  }
+}
+
+// ─── Header controls (filters + search) ───────────────────────────────────
+
+.library-search-input {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  background: var(--surface);
+  padding: 9px 14px;
+  margin-bottom: 22px;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+
+  &::placeholder {
+    color: var(--ink3);
+  }
+
+  &:focus {
+    border-color: var(--ink3);
+  }
+}
+
+// ─── Picker modal ──────────────────────────────────────────────────────────
+
+.library-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 24px;
+}
+
+.library-picker {
+  width: 100%;
+  max-width: 440px;
+  max-height: 80vh;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.library-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.library-picker-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.library-picker-close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  color: var(--ink3);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.library-picker-search-wrap {
+  flex: none;
+  padding: 14px 20px 0;
+}
+
+.library-picker-search {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  background: var(--surface2);
+  padding: 8px 12px;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+
+  &::placeholder {
+    color: var(--ink3);
+  }
+
+  &:focus {
+    border-color: var(--ink3);
+  }
+}
+
+.library-picker-empty {
+  margin: 0;
+  padding: 28px 28px 32px;
+  text-align: center;
+  line-height: 1.55;
+}
+
+.library-picker-list {
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.library-picker-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover {
+    background: var(--surface2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.library-picker-item-art {
+  flex: none;
+  width: 40px;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  background-color: var(--surface2);
+  background-size: cover;
+  background-position: center;
+}
+
+.library-picker-item-body {
+  min-width: 0;
+}
+
+.library-picker-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-picker-item-meta {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-top: 1px;
+}

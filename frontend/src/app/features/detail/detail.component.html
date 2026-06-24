@@ -1,0 +1,109 @@
+<div class="sh-screen">
+  <app-top-nav />
+
+  <div class="detail-body">
+    <button class="mono detail-back" (click)="goBack()">← back</button>
+
+    @if (isLoading()) {
+      <p class="detail-status-text">Loading…</p>
+    } @else if (notFound() || !content()) {
+      <p class="detail-status-text">Content not found.</p>
+    } @else {
+      <div class="detail-grid">
+        <div class="detail-left">
+          <div class="detail-poster" [style.backgroundImage]="content()!.posterUrl ? 'url(' + content()!.posterUrl + ')' : null">
+            <span class="mono detail-poster-meta">{{ typeLabel() }} · {{ content()!.year ?? '—' }}</span>
+            <span class="detail-poster-title">{{ content()!.title }}</span>
+          </div>
+        </div>
+
+        <div class="detail-right">
+          <h1 class="detail-title">{{ content()!.title }}</h1>
+          <div class="detail-meta-row">
+            <span class="mono detail-meta-text">
+              {{ content()!.year ?? '—' }}
+              @if (durationLabel()) {
+                · {{ durationLabel() }}
+              }
+            </span>
+            @if (content()!.rating) {
+              <span class="mono detail-rating-chip">★ {{ content()!.rating | number: '1.2-2' }}</span>
+            }
+          </div>
+
+          @if (content()!.genres.length > 0) {
+            <div class="detail-genres">
+              @for (genre of content()!.genres; track genre) {
+                <span class="detail-genre-chip">{{ genre }}</span>
+              }
+            </div>
+          }
+
+          <p class="detail-overview">{{ content()!.overview || 'No description available.' }}</p>
+
+          <div class="detail-tracking-card">
+            <div class="mono detail-card-label">in your list</div>
+
+            <div class="detail-status-row">
+              @for (option of statusOptions(); track option.value) {
+                <button
+                  class="detail-status-btn"
+                  [class.active]="trackingEntry()?.status === option.value"
+                  [disabled]="isSaving()"
+                  (click)="setStatus(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              }
+            </div>
+
+            <div class="mono detail-card-label">your rating</div>
+            <div class="detail-rating-row">
+              @for (value of ratingScale; track value) {
+                <button
+                  class="detail-rating-star"
+                  [class.filled]="(trackingEntry()?.rating ?? 0) >= value"
+                  [disabled]="isSaving() || !canRate()"
+                  (click)="setRating(value)"
+                  [attr.aria-label]="'Rate ' + value"
+                >★</button>
+              }
+              <span class="mono detail-rating-value">
+                @if (trackingEntry()?.rating) {
+                  {{ trackingEntry()!.rating }}<span class="detail-rating-max">/10</span>
+                } @else if (!canRate()) {
+                  <span class="detail-rating-max">set a status first</span>
+                } @else {
+                  <span class="detail-rating-max">—/10</span>
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if (isLoadingSimilar()) {
+        <div class="detail-similar-section">
+          <div class="mono detail-similar-title">More like this</div>
+          <p class="detail-status-text">Loading…</p>
+        </div>
+      } @else if (similarItems().length > 0) {
+        <div class="detail-similar-section">
+          <div class="mono detail-similar-title">More like this</div>
+          <div class="detail-similar-grid">
+            @for (item of similarItems(); track item.contentId) {
+              <a class="detail-similar-poster" [routerLink]="['/title', item.contentType, item.contentId]">
+                <div
+                  class="detail-similar-art"
+                  [style.backgroundImage]="item.posterUrl ? 'url(' + item.posterUrl + ')' : null"
+                ></div>
+                <div class="detail-similar-poster-title">{{ item.title }}</div>
+                <div class="mono detail-similar-poster-meta">{{ itemTypeLabel(item.contentType) }} · {{ item.year ?? '—' }}</div>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

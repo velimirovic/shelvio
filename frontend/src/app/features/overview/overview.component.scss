@@ -18,20 +18,13 @@
   margin: 0 0 12px;
 }
 
-.overview-subtext {
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ink2);
-  max-width: 640px;
-  margin: 0 0 32px;
-}
-
 .overview-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px 22px;
   max-width: 420px;
+  margin-top: 24px;
   box-shadow: var(--shadow);
 }
 
@@ -60,4 +53,11 @@
 
 .overview-card-value {
   font-weight: 600;
+}
+
+.overview-tbd {
+  margin-top: 24px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink3);
 }
