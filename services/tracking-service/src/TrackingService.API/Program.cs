@@ -77,6 +77,15 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Automatski primeni EF Core migracije na startu - bez ovoga bi svako ko prvi put
+// pokrene docker compose morao rucno da pokrene `dotnet ef database update` (treba
+// .NET SDK lokalno). Docker Compose ceka da Postgres bude "healthy" pre nego sto
+// pokrene ovaj kontejner, tako da baza vec postoji kad se ovo izvrsi.
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<TrackingDbContext>().Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
