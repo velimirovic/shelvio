@@ -59,4 +59,9 @@ app.UseAuthorization();
 
 app.MapReverseProxy();
 
+// AllowAnonymous je obavezan - FallbackPolicy iznad trazi JWT za SVE rute, a health
+// proveru poziva infrastruktura (Docker, monitoring), ne ulogovani korisnik.
+app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "api-gateway" }))
+    .AllowAnonymous();
+
 app.Run();
