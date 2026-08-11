@@ -37,5 +37,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/stats/stats.component').then((m) => m.StatsComponent)
   },
+  {
+    path: 'recommendations',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/recommendations/recommendations.component').then(
+        (m) => m.RecommendationsComponent
+      )
+  },
   { path: '**', redirectTo: 'overview' }
 ];

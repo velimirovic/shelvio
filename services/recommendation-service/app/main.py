@@ -1,16 +1,21 @@
-from fastapi import FastAPI
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
-# TODO: from app.db.session import init_db
-# TODO: from app.messaging.consumer import start_consumer
-# TODO: from app.api.routes import recommendations
+from fastapi import FastAPI
+
+from app.messaging.consumer import start_consumer
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # TODO: await init_db()
-    # TODO: asyncio.create_task(start_consumer())
+    consumer_task = asyncio.create_task(start_consumer())
+    logger.info("Recommendation service ready.")
     yield
+    consumer_task.cancel()
 
 
 app = FastAPI(
@@ -19,7 +24,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# TODO: app.include_router(recommendations.router, prefix="/api/recommendations")
+from app.api.routes.recommendations import router  # noqa: E402
+app.include_router(router)
 
 
 @app.get("/health")

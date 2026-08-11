@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TrackingService.API.Data;
 using TrackingService.API.Interfaces;
+using TrackingService.API.Messaging;
 using TrackingService.API.Middleware;
 using TrackingService.API.Repositories;
 using TrackingService.API.Services;
@@ -39,6 +40,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<TrackingDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("TrackingDb")));
+
+builder.Services.AddSingleton<RabbitMqPublisher>();
 
 builder.Services.AddScoped<ITrackingRepository, TrackingRepository>();
 builder.Services.AddScoped<ITrackingService, TrackingEntryService>();

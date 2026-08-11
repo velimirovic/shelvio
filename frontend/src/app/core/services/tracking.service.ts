@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ContentType } from '../models/content.models';
-import { CreateTrackingEntry, FavoritePick, TrackingEntry, TrackingStats, UpdateTrackingEntry } from '../models/tracking.models';
+import { CreateTrackingEntry, FavoritePick, RecommendationFilter, RecommendationsResponse, TrackingEntry, TrackingStats, UpdateTrackingEntry } from '../models/tracking.models';
 
 @Injectable({ providedIn: 'root' })
 export class TrackingService {
@@ -48,5 +48,11 @@ export class TrackingService {
 
   clearFavoritePick(contentType: ContentType, position: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/tracking/favorites/${contentType}/${position}`);
+  }
+
+  getRecommendations(type: RecommendationFilter, refresh = false): Observable<RecommendationsResponse> {
+    return this.http.get<RecommendationsResponse>(`${environment.apiUrl}/recommendations`, {
+      params: { type, ...(refresh ? { refresh: 'true' } : {}) }
+    });
   }
 }

@@ -3,16 +3,19 @@ using TrackingService.API.Dtos;
 using TrackingService.API.Entities;
 using TrackingService.API.Exceptions;
 using TrackingService.API.Interfaces;
+using TrackingService.API.Messaging;
 
 namespace TrackingService.API.Services;
 
 public class TrackingEntryService : ITrackingService
 {
     private readonly ITrackingRepository _repository;
+    private readonly RabbitMqPublisher _publisher;
 
-    public TrackingEntryService(ITrackingRepository repository)
+    public TrackingEntryService(ITrackingRepository repository, RabbitMqPublisher publisher)
     {
         _repository = repository;
+        _publisher = publisher;
     }
 
     public async Task<TrackingEntryDto> AddOrUpdateAsync(Guid userId, CreateTrackingEntryDto dto)
@@ -33,6 +36,10 @@ public class TrackingEntryService : ITrackingService
             existing.Rating = dto.Rating;
 
             await _repository.SaveChangesAsync();
+
+            if (dto.Rating.HasValue)
+                _ = _publisher.PublishUserRatedAsync(userId.ToString(), dto.ContentId, dto.ContentType);
+
             return ToDto(existing);
         }
 
@@ -56,6 +63,9 @@ public class TrackingEntryService : ITrackingService
         await _repository.AddAsync(entry);
         await _repository.SaveChangesAsync();
 
+        if (dto.Rating.HasValue)
+            _ = _publisher.PublishUserRatedAsync(userId.ToString(), dto.ContentId, dto.ContentType);
+
         return ToDto(entry);
     }
 
@@ -72,6 +82,9 @@ public class TrackingEntryService : ITrackingService
         entry.Rating = dto.Rating;
 
         await _repository.SaveChangesAsync();
+
+        if (dto.Rating.HasValue)
+            _ = _publisher.PublishUserRatedAsync(userId.ToString(), entry.ContentId, entry.ContentType);
 
         return ToDto(entry);
     }

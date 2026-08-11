@@ -148,14 +148,15 @@ services:
       context: ./services/recommendation-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres-recommendation:5432/recommendationdb"
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq/
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       TRACKING_SERVICE_URL: http://tracking-service:8080
+      CONTENT_SERVICE_URL: http://content-service:3000
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: shelvio
+      JWT_AUDIENCE: shelvio-clients
     depends_on:
-      postgres-recommendation:
-        condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:

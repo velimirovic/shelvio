@@ -63,3 +63,22 @@ export interface FavoritePick {
   position: number;
   entry: TrackingEntry;
 }
+
+export interface Recommendation {
+  contentId: string | null;
+  contentType: ContentType;
+  title: string;
+  year: string | null;
+  posterUrl: string | null;
+  genres: string[];
+  explanation: string;
+}
+
+export interface RecommendationsResponse {
+  recommendations: Recommendation[];
+  generatedAt: string;
+  error?: string;
+  message?: string;
+}
+
+export type RecommendationFilter = 'all' | ContentType;

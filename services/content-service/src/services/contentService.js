@@ -2,6 +2,7 @@ const tmdbClient = require('../clients/tmdbClient');
 const hardcoverClient = require('../clients/hardcoverClient');
 const cacheService = require('./cacheService');
 const { relevanceScore } = require('./rankingService');
+const { publishContentDiscovered } = require('../messaging/publisher');
 
 // Fiksira TMDB-ov "sirov" float (npr. 7.7790000004) na tacno 2 decimale.
 function roundRating(value) {
@@ -153,6 +154,15 @@ async function getDetails(contentType, contentId) {
   } else {
     return null;
   }
+
+  // Fire-and-forget — greska u publisheru ne sme da blokira korisnicki zahtev.
+  publishContentDiscovered({
+    contentId: details.contentId,
+    contentType: details.contentType,
+    title: details.title,
+    genres: details.genres ?? [],
+    overview: details.overview ?? '',
+  });
 
   await cacheService.setCached(cacheKey, details);
 
