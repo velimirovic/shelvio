@@ -2,25 +2,128 @@
   <app-top-nav />
 
   <div class="overview-body">
-    <div class="mono overview-eyebrow">you're in</div>
-    <h1 class="overview-headline">Welcome, {{ authService.currentUser()?.username }}.</h1>
 
-    <div class="overview-card">
-      <div class="mono overview-card-label">prijavljen kao</div>
-      <div class="overview-card-row">
-        <span class="overview-card-key">username</span>
-        <span class="overview-card-value">{{ authService.currentUser()?.username }}</span>
+    <!-- Stats strip -->
+    @if (stats()) {
+      <div class="ov-stats-strip">
+        <div class="ov-stat">
+          <span class="ov-stat-num">{{ stats()!.totalTitles }}</span>
+          <span class="ov-stat-label mono">tracked</span>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat">
+          <span class="ov-stat-num">{{ stats()!.doneCount }}</span>
+          <span class="ov-stat-label mono">finished</span>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat">
+          <span class="ov-stat-num">{{ stats()!.inProgressCount }}</span>
+          <span class="ov-stat-label mono">in progress</span>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat">
+          <span class="ov-stat-num">{{ stats()!.hoursWatched | number:'1.0-0' }}h</span>
+          <span class="ov-stat-label mono">watched</span>
+        </div>
+        @if (stats()!.averageRating !== null) {
+          <div class="ov-stat-sep"></div>
+          <div class="ov-stat">
+            <span class="ov-stat-num">{{ stats()!.averageRating | number:'1.1-1' }}</span>
+            <span class="ov-stat-label mono">avg rating</span>
+          </div>
+        }
+        <div class="ov-stat-spacer"></div>
+        <a routerLink="/stats" class="ov-stats-btn mono">full stats →</a>
       </div>
-      <div class="overview-card-row">
-        <span class="overview-card-key">email</span>
-        <span class="overview-card-value">{{ authService.currentUser()?.email }}</span>
+    }
+
+    <!-- Your library -->
+    <section class="ov-section">
+      <h2 class="ov-section-title mono">your library</h2>
+      <div class="ov-nav-grid">
+        <a routerLink="/library" class="ov-nav-card">
+          <span class="ov-nav-name">movies</span>
+          @if (stats()) { <span class="ov-nav-count mono">{{ stats()!.movieCount }}</span> }
+        </a>
+        <a routerLink="/library" class="ov-nav-card">
+          <span class="ov-nav-name">series</span>
+          @if (stats()) { <span class="ov-nav-count mono">{{ stats()!.seriesCount }}</span> }
+        </a>
+        <a routerLink="/library" class="ov-nav-card">
+          <span class="ov-nav-name">books</span>
+          @if (stats()) { <span class="ov-nav-count mono">{{ stats()!.bookCount }}</span> }
+        </a>
+        <a routerLink="/recommendations" class="ov-nav-card ov-nav-card--accent">
+          <span class="ov-nav-name">recommendations</span>
+        </a>
       </div>
-      <div class="overview-card-row">
-        <span class="overview-card-key">user id</span>
-        <span class="overview-card-value mono">{{ authService.currentUser()?.id }}</span>
+    </section>
+
+    <!-- Trending -->
+    <section class="ov-section">
+      <h2 class="ov-section-title mono">trending now</h2>
+      <div class="ov-top-row">
+        @if (trendingMovie(); as item) {
+          <a [routerLink]="detailRoute(item)" class="ov-top-card">
+            <div class="ov-top-poster">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.title" />
+              } @else {
+                <div class="ov-top-poster-placeholder mono">{{ item.title[0] }}</div>
+              }
+              <span class="ov-top-badge mono">film</span>
+            </div>
+            <div class="ov-top-info">
+              <div class="ov-top-title">{{ item.title }}</div>
+              @if (item.year) { <div class="ov-top-year mono">{{ item.year }}</div> }
+              @if (item.rating) { <div class="ov-top-rating mono">★ {{ item.rating | number:'1.1-1' }}</div> }
+              @if (item.overview) { <p class="ov-top-overview">{{ item.overview }}</p> }
+            </div>
+          </a>
+        }
+        @if (trendingSeries(); as item) {
+          <a [routerLink]="detailRoute(item)" class="ov-top-card">
+            <div class="ov-top-poster">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.title" />
+              } @else {
+                <div class="ov-top-poster-placeholder mono">{{ item.title[0] }}</div>
+              }
+              <span class="ov-top-badge mono">series</span>
+            </div>
+            <div class="ov-top-info">
+              <div class="ov-top-title">{{ item.title }}</div>
+              @if (item.year) { <div class="ov-top-year mono">{{ item.year }}</div> }
+              @if (item.rating) { <div class="ov-top-rating mono">★ {{ item.rating | number:'1.1-1' }}</div> }
+              @if (item.overview) { <p class="ov-top-overview">{{ item.overview }}</p> }
+            </div>
+          </a>
+        }
+        @if (trendingBook(); as item) {
+          <a [routerLink]="detailRoute(item)" class="ov-top-card">
+            <div class="ov-top-poster">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.title" />
+              } @else {
+                <div class="ov-top-poster-placeholder mono">{{ item.title[0] }}</div>
+              }
+              <span class="ov-top-badge mono">book</span>
+            </div>
+            <div class="ov-top-info">
+              <div class="ov-top-title">{{ item.title }}</div>
+              @if (item.year) { <div class="ov-top-year mono">{{ item.year }}</div> }
+              @if (item.rating) { <div class="ov-top-rating mono">★ {{ item.rating | number:'1.1-1' }}</div> }
+              @if (item.overview) { <p class="ov-top-overview">{{ item.overview }}</p> }
+            </div>
+          </a>
+        }
       </div>
+    </section>
+
+    <div class="ov-footer-logo">
+      <img src="logo.png?v=3" alt="" class="ov-footer-logo-mark" />
+      <span class="mono ov-footer-logo-text">shelvio</span>
     </div>
 
-    <div class="mono overview-tbd">To Be Done</div>
   </div>
 </div>

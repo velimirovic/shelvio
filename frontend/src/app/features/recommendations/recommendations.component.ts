@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 import { TrackingService } from '../../core/services/tracking.service';
 import { Recommendation, RecommendationFilter, RecommendationsResponse } from '../../core/models/tracking.models';
 import { ContentType } from '../../core/models/content.models';
@@ -17,7 +18,6 @@ const TYPE_LABELS: Record<ContentType, string> = {
   movie: 'film', series: 'series', book: 'book',
 };
 
-const HISTORY_KEY = 'shelvio_rec_history';
 const MAX_HISTORY = 15;
 
 export interface HistoryEntry {
@@ -33,7 +33,13 @@ export interface HistoryEntry {
   styleUrl: './recommendations.component.scss',
 })
 export class RecommendationsComponent implements OnInit {
+  private readonly authService = inject(AuthService);
   private readonly trackingService = inject(TrackingService);
+
+  private get _historyKey(): string {
+    const uid = this.authService.currentUser()?.id ?? 'anon';
+    return `shelvio_rec_history_${uid}`;
+  }
 
   readonly filters = FILTERS;
 
@@ -44,10 +50,19 @@ export class RecommendationsComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly history = signal<HistoryEntry[]>([]);
   readonly activeHistoryIndex = signal<number | null>(null);
+  readonly generationsRemaining = signal<number | null>(null);
+  readonly dailyLimit = signal(3);
 
   readonly recommendations = computed(() => this.current()?.recommendations ?? []);
   readonly generatedAt = computed(() => this.current()?.generatedAt ?? null);
   readonly hasResult = computed(() => this.recommendations().length > 0);
+  readonly canGenerate = computed(() => {
+    const rem = this.generationsRemaining();
+    return rem === null || rem > 0;
+  });
+  readonly dailyDots = computed(() =>
+    Array.from({ length: this.dailyLimit() }, (_, i) => i)
+  );
 
   ngOnInit(): void {
     this.history.set(this._loadHistory());
@@ -62,6 +77,7 @@ export class RecommendationsComponent implements OnInit {
   }
 
   generate(): void {
+    if (!this.canGenerate()) return;
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.activeHistoryIndex.set(null);
@@ -75,10 +91,18 @@ export class RecommendationsComponent implements OnInit {
         };
         this.current.set(entry);
         this._prependHistory(entry);
+        this.generationsRemaining.set(res.generationsRemaining ?? null);
+        this.dailyLimit.set(res.dailyLimit ?? 3);
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.errorMessage.set(err?.error?.detail ?? 'Something went wrong. Try again later.');
+        const detail = err?.error?.detail;
+        if (err?.status === 429 && detail?.generationsRemaining !== undefined) {
+          this.generationsRemaining.set(0);
+          this.errorMessage.set(`Daily limit reached — resets at midnight UTC.`);
+        } else {
+          this.errorMessage.set(typeof detail === 'string' ? detail : 'Something went wrong. Try again later.');
+        }
         this.isLoading.set(false);
       },
     });
@@ -114,12 +138,12 @@ export class RecommendationsComponent implements OnInit {
 
   private _prependHistory(entry: HistoryEntry): void {
     const updated = [entry, ...this._loadHistory()].slice(0, MAX_HISTORY);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    localStorage.setItem(this._historyKey, JSON.stringify(updated));
     this.history.set(updated);
   }
 
   private _loadHistory(): HistoryEntry[] {
-    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]'); }
+    try { return JSON.parse(localStorage.getItem(this._historyKey) ?? '[]'); }
     catch { return []; }
   }
 }

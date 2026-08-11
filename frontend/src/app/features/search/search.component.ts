@@ -12,6 +12,7 @@ type Category = 'all' | ContentType;
 // Razmak izmedju kartica - mora da se poklapa sa search.component.scss.
 const ROW_ITEM_GAP = 18;
 const TARGET_VISIBLE_COUNT = 6;
+const TARGET_VISIBLE_COUNT_MOBILE = 2;
 const MIN_ITEM_WIDTH = 110;
 const MAX_ITEM_WIDTH = 200;
 
@@ -199,7 +200,8 @@ export class SearchComponent implements OnInit {
       return;
     }
 
-    const rawItemWidth = (available - (TARGET_VISIBLE_COUNT - 1) * ROW_ITEM_GAP) / TARGET_VISIBLE_COUNT;
+    const targetCount = window.innerWidth <= 640 ? TARGET_VISIBLE_COUNT_MOBILE : TARGET_VISIBLE_COUNT;
+    const rawItemWidth = (available - (targetCount - 1) * ROW_ITEM_GAP) / targetCount;
     const itemWidth = Math.min(MAX_ITEM_WIDTH, Math.max(MIN_ITEM_WIDTH, rawItemWidth));
 
     this.currentItemWidth = itemWidth;

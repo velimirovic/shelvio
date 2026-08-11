@@ -11,7 +11,7 @@ Diplomski rad — Marko Velimirović, Fakultet tehničkih nauka, Novi Sad.
 | User Service | ASP.NET Core 9 + EF Core | 8080 | Registracija, login, JWT access/refresh tokeni |
 | Tracking Service | ASP.NET Core 9 + EF Core | 8080 | Liste praćenja, ocene, statusi, lična statistika |
 | Content Service | Node.js 20 + Express | 3000 | TMDB (filmovi/serije) i Hardcover (knjige) integracija, pretraga, Redis keš |
-| Recommendation Service | Python 3.12 + FastAPI | 8000 | AI preporuke (pgvector + GPT re-ranking) — **još nije implementiran, samo skeleton** |
+| Recommendation Service | Python 3.12 + FastAPI | 8000 | AI preporuke zasnovane na korisničkoj istoriji (GPT-4o mini, Redis keš, dnevni limit, RabbitMQ consumer) |
 | PostgreSQL ×3 | postgres:16 / pgvector:pg16 | 5432 (host: 5532/5533/5534) | Po jedna baza po servisu |
 | Redis | redis:7 | 6379 | Keš eksternih API odgovora i preporuka |
 | RabbitMQ | rabbitmq:3.13 | 5672 (management UI: 15672) | Asinhroni eventi ka Recommendation servisu |
@@ -43,6 +43,7 @@ Health provere: gateway `GET :8080/health`; interni servisi imaju sopstveni `/he
 | Tracking Service | `cd services/tracking-service && dotnet test` | Statistika (GetStats), add-or-update logika, user scoping |
 | User Service | `cd services/user-service && dotnet test` | Auth tokovi: register/login/refresh rotacija/logout, BCrypt |
 | Content Service | `cd services/content-service && npx jest` | Algoritam rangiranja pretrage (rankingService) |
+| Recommendation Service | `cd services/recommendation-service && pytest` | Pomoćne funkcije, Redis ključevi, tiering logika, dnevni limit, filtriranje pickova |
 
 ## Struktura repozitorijuma
 
@@ -52,7 +53,7 @@ services/
   user-service/           src/UserService.API + tests/UserService.Tests
   tracking-service/       src/TrackingService.API + tests/TrackingService.Tests
   content-service/        Express app (src/), jest testovi uz kod
-  recommendation-service/ FastAPI skeleton (Faza 6 — u planu)
+  recommendation-service/ FastAPI + OpenAI + Redis + RabbitMQ consumer; pytest testovi
 frontend/                 Angular SPA
 docker-compose.yml        Ceo sistem jednom komandom
 ```

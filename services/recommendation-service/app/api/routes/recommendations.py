@@ -47,4 +47,14 @@ async def get_recommendations(
     if result.get("error") == "not_enough_data":
         raise HTTPException(status_code=422, detail=result["message"])
 
+    if result.get("error") == "daily_limit_reached":
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "message": result["message"],
+                "generationsRemaining": 0,
+                "dailyLimit": result["dailyLimit"],
+            },
+        )
+
     return result

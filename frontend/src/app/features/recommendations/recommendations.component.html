@@ -2,34 +2,128 @@
 
 <div class="rec-body">
 
-  <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
+  <!-- ── Left sidebar — generate controls ──────────────────────────────── -->
   <aside class="rec-sidebar">
-
-    <div class="rec-sidebar-top">
-      <div class="rec-sidebar-section">
-        <p class="rec-sidebar-label mono">generate for</p>
-        <div class="rec-filters">
-          @for (f of filters; track f.value) {
-            <button
-              class="rec-filter"
-              [class.active]="activeFilter() === f.value"
-              (click)="setFilter(f.value)"
-            >{{ f.label }}</button>
-          }
-        </div>
-      </div>
-
-      <button class="rec-generate-btn mono" (click)="generate()" [disabled]="isLoading()">
-        @if (isLoading()) {
-          <span class="rec-spinner"></span>generating…
-        } @else {
-          generate
+    <div class="rec-sidebar-section">
+      <p class="rec-sidebar-label mono">generate for</p>
+      <div class="rec-filters">
+        @for (f of filters; track f.value) {
+          <button
+            class="rec-filter"
+            [class.active]="activeFilter() === f.value"
+            (click)="setFilter(f.value)"
+          >{{ f.label }}</button>
         }
-      </button>
+      </div>
     </div>
 
+    <button class="rec-generate-btn mono" (click)="generate()" [disabled]="isLoading() || !canGenerate()">
+      @if (isLoading()) {
+        <span class="rec-spinner"></span>generating…
+      } @else if (!canGenerate()) {
+        limit reached
+      } @else {
+        generate
+      }
+    </button>
+
+    @if (generationsRemaining() !== null) {
+      <div class="rec-daily-limit mono">
+        <span class="rec-daily-dots">
+          @for (i of dailyDots(); track i) {
+            <span class="rec-daily-dot" [class.used]="i >= generationsRemaining()!"></span>
+          }
+        </span>
+        @if (generationsRemaining()! > 0) {
+          <span class="rec-daily-label">{{ generationsRemaining() }} left today</span>
+        } @else {
+          <span class="rec-daily-label exhausted">resets at midnight</span>
+        }
+      </div>
+    }
+  </aside>
+
+  <!-- ── Main — header + cards ─────────────────────────────────────────── -->
+  <main class="rec-main">
+
+    <div class="rec-center">
+      <div class="rec-main-header">
+        <div>
+          <p class="rec-eyebrow mono">recommendations</p>
+          <h1 class="rec-title">For your taste</h1>
+        </div>
+        @if (generatedAt()) {
+          <span class="rec-generated-at mono">{{ generatedAt() | date:'d MMM yyyy, HH:mm' }}</span>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="rec-error mono">{{ errorMessage() }}</div>
+      }
+
+      @if (!hasResult() && !isLoading() && !errorMessage()) {
+        <div class="rec-empty">
+          <div class="rec-empty-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="24" height="32" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.35"/>
+              <rect x="12" y="4" width="24" height="32" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <rect x="20" y="12" width="24" height="28" rx="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M26 22h12M26 27h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h2 class="rec-empty-heading">Pick something to watch</h2>
+          <p class="rec-empty-text">Choose a type from the sidebar and hit <strong>generate</strong> — we'll find five picks matched to your taste.</p>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="rec-skeleton-list">
+          @for (n of [1,2,3]; track n) {
+            <div class="rec-skeleton-card">
+              <div class="rec-skeleton-poster"></div>
+              <div class="rec-skeleton-info">
+                <div class="rec-skeleton-line short"></div>
+                <div class="rec-skeleton-line title"></div>
+                <div class="rec-skeleton-line"></div>
+                <div class="rec-skeleton-line medium"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (hasResult() && !isLoading()) {
+        <div class="rec-list">
+          @for (rec of recommendations(); track rec.title) {
+            <div class="rec-card">
+              <a class="rec-card-art" [routerLink]="rec.contentId ? detailRoute(rec) : null">
+                @if (rec.posterUrl) {
+                  <img class="rec-card-img" [src]="rec.posterUrl" [alt]="rec.title" />
+                }
+                <span class="rec-card-type-badge mono">{{ typeLabel(rec.contentType) }}</span>
+              </a>
+              <div class="rec-card-info">
+                <div class="rec-card-meta mono">
+                  @if (rec.year) { <span class="rec-card-year">{{ rec.year }}</span> }
+                  @if (rec.genres.length > 0) {
+                    <span class="rec-card-genres">{{ rec.genres.slice(0, 4).join(' · ') }}</span>
+                  }
+                </div>
+                <h2 class="rec-card-title">{{ rec.title }}</h2>
+                <p class="rec-card-explanation">{{ rec.explanation }}</p>
+                @if (rec.contentId) {
+                  <a class="rec-card-cta mono" [routerLink]="detailRoute(rec)">View &amp; add to library →</a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ── Right sidebar — history ──────────────────────────────────────── -->
     @if (history().length > 0) {
-      <div class="rec-sidebar-section rec-history-section">
+      <aside class="rec-history-panel">
         <p class="rec-sidebar-label mono">history</p>
         <div class="rec-history-list">
           @for (entry of history(); track entry.generatedAt; let i = $index) {
@@ -48,95 +142,7 @@
             </button>
           }
         </div>
-      </div>
-    }
-
-  </aside>
-
-  <!-- ── Main ─────────────────────────────────────────────────────────── -->
-  <main class="rec-main">
-
-    <div class="rec-main-header">
-      <div>
-        <p class="rec-eyebrow mono">recommendations</p>
-        <h1 class="rec-title">For your taste</h1>
-      </div>
-      @if (generatedAt()) {
-        <span class="rec-generated-at mono">{{ generatedAt() | date:'d MMM yyyy, HH:mm' }}</span>
-      }
-    </div>
-
-    @if (errorMessage()) {
-      <div class="rec-error mono">{{ errorMessage() }}</div>
-    }
-
-    @if (!hasResult() && !isLoading() && !errorMessage()) {
-      <div class="rec-empty">
-        <div class="rec-empty-icon">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="4" y="8" width="24" height="32" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.35"/>
-            <rect x="12" y="4" width="24" height="32" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
-            <rect x="20" y="12" width="24" height="28" rx="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M26 22h12M26 27h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <h2 class="rec-empty-heading">Pick something to watch</h2>
-        <p class="rec-empty-text">Choose a type from the sidebar and hit <strong>generate</strong> — we'll find five picks matched to your taste.</p>
-      </div>
-    }
-
-    @if (isLoading()) {
-      <div class="rec-skeleton-list">
-        @for (n of [1,2,3]; track n) {
-          <div class="rec-skeleton-card">
-            <div class="rec-skeleton-poster"></div>
-            <div class="rec-skeleton-info">
-              <div class="rec-skeleton-line short"></div>
-              <div class="rec-skeleton-line title"></div>
-              <div class="rec-skeleton-line"></div>
-              <div class="rec-skeleton-line medium"></div>
-            </div>
-          </div>
-        }
-      </div>
-    }
-
-    @if (hasResult() && !isLoading()) {
-      <div class="rec-list">
-        @for (rec of recommendations(); track rec.title) {
-          <div class="rec-card">
-
-            <!-- Poster — same width as library 5-col card -->
-            <a
-              class="rec-card-art"
-              [routerLink]="rec.contentId ? detailRoute(rec) : null"
-            >
-              @if (rec.posterUrl) {
-                <img class="rec-card-img" [src]="rec.posterUrl" [alt]="rec.title" />
-              }
-              <span class="rec-card-type-badge mono">{{ typeLabel(rec.contentType) }}</span>
-            </a>
-
-            <!-- Info -->
-            <div class="rec-card-info">
-              <div class="rec-card-meta mono">
-                @if (rec.year) { <span class="rec-card-year">{{ rec.year }}</span> }
-                @if (rec.genres.length > 0) {
-                  <span class="rec-card-genres">{{ rec.genres.slice(0, 4).join(' · ') }}</span>
-                }
-              </div>
-
-              <h2 class="rec-card-title">{{ rec.title }}</h2>
-              <p class="rec-card-explanation">{{ rec.explanation }}</p>
-
-              @if (rec.contentId) {
-                <a class="rec-card-cta mono" [routerLink]="detailRoute(rec)">View &amp; add to library →</a>
-              }
-            </div>
-
-          </div>
-        }
-      </div>
+      </aside>
     }
 
   </main>

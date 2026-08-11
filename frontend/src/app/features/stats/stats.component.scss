@@ -70,21 +70,89 @@
   font-weight: 500;
 }
 
+.stats-card-value--md {
+  font-size: 24px;
+}
+
 .stats-card-empty {
   color: var(--ink3);
 }
 
-.stats-panels {
+.stats-headline-row {
+  margin-bottom: 24px;
+}
+
+.stats-title-dim {
+  color: var(--ink3);
+}
+
+.stats-mid-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1.4fr;
   gap: 16px;
   margin-bottom: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .stats-mid-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stats-genres-panel {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 760px) {
-  .stats-panels {
+  .stats-mid-row {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 640px) {
+  .stats-body {
+    padding: 20px 16px 88px;
+  }
+
+  .stats-title {
+    font-size: 26px;
+    margin-bottom: 18px;
+  }
+
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stats-card {
+    padding: 14px;
+  }
+
+  .stats-card-value {
+    font-size: 26px;
+  }
+
+  .stats-fun-cards {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .stats-fun-card {
+    min-width: 0;
+  }
+
+  .stats-fun-value {
+    font-size: 24px;
+  }
+
+  .stats-mid-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-empty {
+  padding-top: 40px;
 }
 
 .stats-panel {
@@ -150,9 +218,7 @@
 
 // ─── Genres (3 kolone, jedna po tipu sadrzaja) ─────────────────────────────
 
-.stats-genres-panel {
-  margin-bottom: 16px;
-}
+.stats-genres-panel {}
 
 .stats-genre-columns {
   display: grid;

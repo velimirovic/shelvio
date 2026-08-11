@@ -269,7 +269,46 @@
 }
 
 @media (max-width: 640px) {
+  .search-body {
+    padding: 20px 16px 88px;
+  }
+
+  .search-title {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .search-bar {
+    height: 52px;
+    padding: 0 14px;
+  }
+
+  .search-bar-input {
+    // 16px prevents iOS auto-zoom on input focus
+    font-size: 16px;
+  }
+
   .search-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 18px 12px;
+  }
+
+  .search-chips {
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  // Hide scroll arrows on mobile — users swipe
+  .search-row-arrow {
+    display: none;
+  }
+
+  .search-row-wrap {
+    gap: 0;
+  }
+
+  .search-row-scroll {
+    gap: 12px;
+    padding-bottom: 4px;
   }
 }

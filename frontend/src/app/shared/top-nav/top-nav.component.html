@@ -5,22 +5,20 @@
       <span class="mono topnav-logo-text">shelvio</span>
     </div>
     <div class="mono topnav-items">
-      <a
-        class="topnav-item"
-        routerLink="/overview"
-        routerLinkActive="active"
-        >overview</a
-      >
+      <a class="topnav-item" routerLink="/overview" routerLinkActive="active">overview</a>
       <a class="topnav-item" routerLink="/search" routerLinkActive="active">search</a>
       <a class="topnav-item" routerLink="/library" routerLinkActive="active">library</a>
-      <a class="topnav-item" routerLink="/stats" routerLinkActive="active">stats</a>
       <a class="topnav-item" routerLink="/recommendations" routerLinkActive="active">recommendations</a>
     </div>
   </div>
   <div class="topnav-right">
-    <div class="topnav-avatar">
-      {{ authService.currentUser()?.username?.charAt(0)?.toUpperCase() }}
-    </div>
+    <a class="topnav-stats-btn" routerLink="/stats" routerLinkActive="active" title="Stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
+      </svg>
+    </a>
     <button class="topnav-logout" (click)="logout()" aria-label="Sign out" title="Sign out">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -29,4 +27,34 @@
       </svg>
     </button>
   </div>
+</nav>
+
+<nav class="bottom-nav mono">
+  <a class="bottom-nav-item" routerLink="/overview" routerLinkActive="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span>overview</span>
+  </a>
+  <a class="bottom-nav-item" routerLink="/search" routerLinkActive="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <span>search</span>
+  </a>
+  <a class="bottom-nav-item" routerLink="/library" routerLinkActive="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+    <span>library</span>
+  </a>
+  <a class="bottom-nav-item" routerLink="/recommendations" routerLinkActive="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    <span>recs</span>
+  </a>
 </nav>

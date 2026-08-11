@@ -73,16 +73,71 @@
   }
 }
 
-@media (max-width: 640px) {
-  .library-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (max-width: 760px) {
   .library-favorites {
     flex-direction: column;
     gap: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .library-body {
+    padding: 20px 16px 88px;
+  }
+
+  .library-favorites-wrap {
+    padding: 20px 16px 0;
+  }
+
+  .library-favorites {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .library-favorites-row:not(:first-child) {
+    border-left: none;
+    border-top: 1px solid var(--border2);
+    margin-left: 0;
+    padding-left: 0;
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  // Fix: replace flex with grid so all 3 slots always get equal, reliable widths
+  .library-favorites-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .library-favorite-card,
+  .library-favorite-empty {
+    flex: unset;
+    max-width: none;
+    width: auto;
+  }
+
+  .library-title {
+    font-size: 28px;
+  }
+
+  .library-header {
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .library-filters {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .library-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 12px;
+  }
+
+  .library-search-input {
+    max-width: 100%;
   }
 }
 

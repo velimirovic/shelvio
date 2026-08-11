@@ -21,6 +21,7 @@ _redis = aioredis.from_url(settings.redis_url, decode_responses=True)
 
 FINAL_PICKS = 5
 RECENT_HISTORY_GENERATIONS = 5  # koliko generisanja unazad se iskljucuje
+DAILY_LIMIT = 3
 
 
 def _cache_key(user_id: str, content_type: str) -> str:
@@ -33,6 +34,28 @@ def _history_key(user_id: str) -> str:
 
 def _refs_key(user_id: str) -> str:
     return f"rec_refs:{user_id}"
+
+
+def _daily_key(user_id: str) -> str:
+    from datetime import datetime, timezone
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return f"rec_daily:{user_id}:{today}"
+
+
+async def _get_daily_used(user_id: str) -> int:
+    val = await _redis.get(_daily_key(user_id))
+    return int(val) if val else 0
+
+
+async def _increment_daily(user_id: str) -> int:
+    from datetime import datetime, timezone, timedelta
+    key = _daily_key(user_id)
+    count = await _redis.incr(key)
+    # TTL do ponoci UTC + 60s buffer
+    now = datetime.now(timezone.utc)
+    midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    await _redis.expire(key, int((midnight - now).total_seconds()) + 60)
+    return count
 
 
 # Max refs po generisanju × broj generisanja u historiji
@@ -125,7 +148,21 @@ async def get_recommendations(
         cached = await _redis.get(cache_key)
         if cached:
             logger.info(f"Cache hit for user={user_id} type={content_type}")
-            return json.loads(cached)
+            payload = json.loads(cached)
+            daily_used = await _get_daily_used(user_id)
+            payload["generationsRemaining"] = max(0, DAILY_LIMIT - daily_used)
+            payload["dailyLimit"] = DAILY_LIMIT
+            return payload
+
+    # Provjeri dnevni limit prije GPT poziva.
+    daily_used = await _get_daily_used(user_id)
+    if daily_used >= DAILY_LIMIT:
+        return {
+            "error": "daily_limit_reached",
+            "message": f"You've used all {DAILY_LIMIT} generations for today. Resets at midnight UTC.",
+            "generationsRemaining": 0,
+            "dailyLimit": DAILY_LIMIT,
+        }
 
     entries = await get_tracking_entries(user_token)
 
@@ -289,7 +326,16 @@ Schema: [{{"title": "...", "contentType": "movie|series|book", "year": "YYYY", "
             "explanation": pick.get("explanation", ""),
         })
 
-    payload = {"recommendations": enriched, "generatedAt": _now_iso()}
+    # Inkrementiraj dnevni brojac tek kad smo sigurni da je generisanje uspjelo.
+    new_daily_used = await _increment_daily(user_id)
+    generations_remaining = max(0, DAILY_LIMIT - new_daily_used)
+
+    payload = {
+        "recommendations": enriched,
+        "generatedAt": _now_iso(),
+        "generationsRemaining": generations_remaining,
+        "dailyLimit": DAILY_LIMIT,
+    }
     await _redis.set(cache_key, json.dumps(payload), ex=settings.recommendation_cache_ttl)
 
     # Reference su poznate iz Pythona — ne oslanjamo se na GPT da ih prijavi.

@@ -1,30 +1,50 @@
 .rec-body {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  max-width: 1180px;
+  grid-template-columns: 200px 1fr;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 38px 30px 80px;
-  gap: 48px;
+  gap: 40px;
   align-items: start;
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────────────────
+// ── Left sidebar — controls ───────────────────────────────────────────────────
 
 .rec-sidebar {
   position: sticky;
   top: 32px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-}
-
-.rec-sidebar-top {
-  display: flex;
-  flex-direction: column;
   gap: 16px;
 }
 
 .rec-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// ── Main — center + right history ─────────────────────────────────────────────
+
+.rec-main {
+  display: flex;
+  gap: 32px;
+  align-items: start;
+  min-width: 0;
+}
+
+.rec-center {
+  flex: 1;
+  min-width: 0;
+}
+
+// ── Right sidebar — history ────────────────────────────────────────────────────
+
+.rec-history-panel {
+  flex-shrink: 0;
+  width: 210px;
+  position: sticky;
+  top: 32px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -79,6 +99,36 @@
 
   &:disabled { opacity: 0.5; cursor: not-allowed; }
   &:not(:disabled):hover { opacity: 0.88; }
+}
+
+.rec-daily-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rec-daily-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.rec-daily-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: background 0.2s, opacity 0.2s;
+
+  &.used {
+    background: var(--border2);
+  }
+}
+
+.rec-daily-label {
+  font-size: 10px;
+  color: var(--ink3);
+
+  &.exhausted { color: var(--ink2); }
 }
 
 .rec-spinner {
@@ -150,9 +200,6 @@
   text-overflow: ellipsis;
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
-
-.rec-main { min-width: 0; }
 
 .rec-main-header {
   display: flex;
@@ -188,8 +235,11 @@
 // ── States ────────────────────────────────────────────────────────────────────
 
 .rec-empty {
-  padding: 56px 0 48px;
-  max-width: 360px;
+  padding: 80px 0 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .rec-empty-icon {
@@ -220,6 +270,7 @@
   padding: 14px 16px;
   border-radius: 4px;
   max-width: 480px;
+  margin-bottom: 28px;
 }
 
 // ── Skeleton loading ──────────────────────────────────────────────────────────
@@ -402,7 +453,28 @@
 
 // ── Responsive ────────────────────────────────────────────────────────────────
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
+  .rec-history-panel { display: none; }
+}
+
+@media (max-width: 600px) {
+  // Show history below cards on mobile
+  .rec-history-panel {
+    display: flex;
+    position: static;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    margin-top: 16px;
+    flex-direction: column;
+  }
+
+  .rec-main {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 760px) {
   .rec-body {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -412,14 +484,7 @@
     position: static;
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 20px;
-  }
-
-  .rec-sidebar-top {
-    flex-direction: row;
     align-items: flex-end;
-    flex-wrap: wrap;
     gap: 16px;
   }
 
@@ -432,35 +497,13 @@
     width: auto;
     padding: 10px 24px;
   }
-
-  .rec-history-section {
-    width: 100%;
-    border-top: 1px solid var(--border);
-    padding-top: 16px;
-  }
-
-  .rec-history-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .rec-history-entry {
-    width: auto;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-  }
-
-  .rec-history-titles { display: none; }
 }
 
 @media (max-width: 600px) {
-  .rec-body { padding: 24px 16px 60px; }
+  .rec-body { padding: 20px 16px 88px; }
   .rec-title { font-size: 28px; }
-
-  .rec-card {
-    grid-template-columns: 120px 1fr;
-  }
+  .rec-card { grid-template-columns: 110px 1fr; }
+  .rec-skeleton-card { grid-template-columns: 110px 1fr; }
+  .rec-card-title { font-size: 15px; }
+  .rec-card-explanation { font-size: 12px; -webkit-line-clamp: 4; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
 }

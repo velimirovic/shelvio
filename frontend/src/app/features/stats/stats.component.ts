@@ -85,9 +85,17 @@ export class StatsComponent implements OnInit {
     ]);
   });
 
-  // "Kilometers you'd have walked" - fun-fact konverzija iz hoursWatched, ne stvarno
-  // mereno (jasno naznaceno na UI-ju). 5 km/h je standardna prosecna brzina hoda.
   readonly kmWalked = computed(() => (this.stats()?.hoursWatched ?? 0) * WALKING_SPEED_KMH);
+  readonly coffees = computed(() => Math.round((this.stats()?.hoursWatched ?? 0) * 2));
+  readonly nightsIn = computed(() => Math.round((this.stats()?.hoursWatched ?? 0) / 8));
+  readonly daysWatching = computed(() => +((this.stats()?.hoursWatched ?? 0) / 24).toFixed(1));
+
+  headlineVerb(h: number): string {
+    if (h < 10) return 'getting started';
+    if (h < 50) return 'building something';
+    if (h < 200) return 'deep in it';
+    return 'fully committed';
+  }
 
   ngOnInit(): void {
     this.trackingService.getStats().subscribe({

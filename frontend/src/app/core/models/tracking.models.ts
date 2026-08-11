@@ -77,6 +77,8 @@ export interface Recommendation {
 export interface RecommendationsResponse {
   recommendations: Recommendation[];
   generatedAt: string;
+  generationsRemaining: number;
+  dailyLimit: number;
   error?: string;
   message?: string;
 }
